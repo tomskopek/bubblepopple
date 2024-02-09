@@ -47,8 +47,8 @@ window.onload = function () {
     fontSize = FONT_SIZE;
 
     constructor(x, y, val) {
-      this.x = x;
-      this.y = y;
+      this.x = x; // Not really used?
+      this.y = y; // Not really used?
       this.val = val;
       this.shift = 0; // Shift the tile when removing
       this.velocity = 0; // Velocity when removing
@@ -155,9 +155,10 @@ window.onload = function () {
         if (tile && tile.shouldRemove) {
           tile.velocity += 1000 * dt;
           tile.shift += tile.velocity * dt;
-          //   console.log(tile.shift, tile.velocity, dt);
-          // TODO: remove the tile when it's off screen
-          if (tile.y + tile.shift > level.height - tile.height) {
+          const tileY = getTileCoordinate(i, j).y + tile.shift;
+
+          if (tileY > level.height - TILE_SIZE) {
+            // Remove the tile when it's below the floor
             level.tiles[i][j] = null;
           }
         }
