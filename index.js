@@ -69,7 +69,7 @@ window.onload = function () {
 
   function init() {
     level.width = level.columns * level.tileWidth + level.tileWidth / 2;
-    level.height = level.rows * level.rowHeight;
+    level.height = canvas.height;
 
     // Initialize the 2d array of tiles
     for (let i = 0; i < level.startingRows; i++) {
@@ -113,7 +113,6 @@ window.onload = function () {
   function render() {
     renderFrame();
     renderTiles();
-    renderKeyboard();
   }
 
   function getTileCoordinate(row, col) {
@@ -156,7 +155,7 @@ window.onload = function () {
         if (tile && tile.shouldRemove) {
           tile.velocity += 1000 * dt;
           tile.shift += tile.velocity * dt;
-        //   console.log(tile.shift, tile.velocity, dt);
+          //   console.log(tile.shift, tile.velocity, dt);
           // TODO: remove the tile when it's off screen
           if (tile.y + tile.shift > level.height - tile.height) {
             level.tiles[i][j] = null;
@@ -167,25 +166,21 @@ window.onload = function () {
     render();
   }
 
-  function renderKeyboard() {
-    // Keyboard background
-    context.fillStyle = "#000";
-    context.fillRect(level.x, level.height + FLOOR_HEIGHT, level.width, canvas.height);
-
-    context.fillStyle = "#000";
-  }
-
   function renderFrame() {
-    // fill the background with a subtle pattern
-    const gradient = context.createLinearGradient(0, 0, level.width, level.height);
-    gradient.addColorStop(0, '#fdfbfb'); // Light shade of gray
-    gradient.addColorStop(1, '#ebedee'); // Slightly darker shade of gray
+    const gradient = context.createLinearGradient(
+      0,
+      0,
+      level.width,
+      level.height
+    );
+    gradient.addColorStop(0, "#fdfbfb"); // Light shade of gray
+    gradient.addColorStop(1, "#ebedee"); // Slightly darker shade of gray
     context.fillStyle = gradient;
     context.fillRect(level.x, level.y, level.width, level.height);
 
     // Draw Floor
     context.fillStyle = "#000";
-    context.fillRect(level.x, level.height, level.width, FLOOR_HEIGHT);
+    context.fillRect(level.x, level.height - 5, level.width, level.height);
   }
 
   function renderTiles() {
