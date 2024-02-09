@@ -1,14 +1,12 @@
 import { getRandomLetter } from "./letters.js";
 import { degToRad } from "./angles.js";
+import { updateFps, renderFps } from "./fps.js";
 
 window.onload = function () {
   const canvas = document.getElementById("viewport");
   const context = canvas.getContext("2d");
 
   let lastFrame = 0;
-  let fpsTime = 0;
-  let frameCount = 0;
-  let fps = 0;
 
   let initialized = false;
 
@@ -21,6 +19,9 @@ window.onload = function () {
     removing: 2,
   };
   let gameState = gameStates.idle;
+
+  // Options
+  const SHOW_FPS = true;
 
   const TILE_SIZE = 50;
   const FONT_SIZE = 24;
@@ -101,6 +102,8 @@ window.onload = function () {
     const dt = (tframe - lastFrame) / 1000;
     lastFrame = tframe;
 
+    updateFps(dt);
+
     if (gameState == gameStates.idle) {
       // Ready for player input
     } else if (gameState == gameStates.removing) {
@@ -113,6 +116,9 @@ window.onload = function () {
   function render() {
     renderFrame();
     renderTiles();
+    if (SHOW_FPS) {
+      renderFps(context);
+    }
   }
 
   function getTileCoordinate(row, col) {
@@ -181,7 +187,12 @@ window.onload = function () {
 
     // Draw Floor
     context.fillStyle = "#000";
-    context.fillRect(level.x, level.height - 5, level.width, level.height);
+    context.fillRect(
+      level.x,
+      level.height - FLOOR_HEIGHT,
+      level.width,
+      level.height
+    );
   }
 
   function renderTiles() {
