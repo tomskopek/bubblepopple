@@ -1,5 +1,5 @@
 import { getRandomLetter } from "./letters.js";
-import { degToRad } from "./angles.js";
+import { degToRad, radToDeg } from "./angles.js";
 import { updateFps, renderFps } from "./fps.js";
 
 window.onload = function () {
@@ -28,6 +28,7 @@ window.onload = function () {
   const DROP_SPEED = 1000;
 
   const FLOOR_HEIGHT = 5;
+  const TURRET_HEIGHT = 36;
 
   const level = {
     x: 0, // x posn
@@ -42,6 +43,12 @@ window.onload = function () {
     rowHeight: TILE_SIZE * Math.cos(degToRad(30)), // height of each row
     radius: TILE_SIZE / 2, // radius of the circle
     tiles: [], // 2d array to hold the tiles
+  };
+
+  const player = {
+    centerX: 0, // gets calculated
+    centerY: 0, // gets calculated
+    angle: 0,
   };
 
   class Tile {
@@ -69,8 +76,12 @@ window.onload = function () {
   }
 
   function init() {
+    canvas.addEventListener("mousemove", onMouseMove);
+
     level.width = level.columns * level.tileWidth + level.tileWidth / 2;
     level.height = canvas.height;
+    player.centerX = level.width / 2;
+    player.centerY = level.height - FLOOR_HEIGHT - TURRET_HEIGHT;
 
     // Initialize the 2d array of tiles
     for (let i = 0; i < level.startingRows; i++) {
@@ -116,6 +127,7 @@ window.onload = function () {
   function render() {
     renderFrame();
     renderTiles();
+    renderPlayer();
     if (SHOW_FPS) {
       renderFps(context);
     }
@@ -232,6 +244,79 @@ window.onload = function () {
         }
       }
     }
+  }
+  // Get the mouse position
+  function getMousePos(canvas, e) {
+    var rect = canvas.getBoundingClientRect();
+    return {
+      x: Math.round(
+        ((e.clientX - rect.left) / (rect.right - rect.left)) * canvas.width
+      ),
+      y: Math.round(
+        ((e.clientY - rect.top) / (rect.bottom - rect.top)) * canvas.height
+      ),
+    };
+  }
+
+  function onMouseMove(e) {
+    // Get the mouse position
+    let pos = getMousePos(canvas, e);
+
+    // Get the mouse angle
+    let mouseAngle = radToDeg(
+      Math.atan2(player.centerY - pos.y, pos.x - player.centerX)
+    );
+
+    // Convert range to 0, 360 degrees
+    if (mouseAngle < 0) {
+      mouseAngle = 180 + (180 + mouseAngle);
+    }
+
+    //         90
+    //       ___
+    // 180  /   \ 0
+    //      \___/
+    //       270
+
+    const lBound = 172;
+    const rBound = 8;
+
+    if (mouseAngle < 270 && mouseAngle > lBound) {
+      mouseAngle = lBound;
+    } else if (mouseAngle > 90 && mouseAngle < rBound) {
+      mouseAngle = rBound;
+    }
+
+    player.angle = mouseAngle;
+  }
+
+  function renderPlayer() {
+    const TURRET_WIDTH = 60;
+    const centerX = level.width / 2;
+    const centerY = level.height - TURRET_HEIGHT - FLOOR_HEIGHT;
+
+    // Draw turret
+    context.fillStyle = "#000";
+    context.beginPath();
+    context.fillRect(
+      centerX - TURRET_WIDTH / 2,
+      centerY,
+      TURRET_WIDTH,
+      TURRET_HEIGHT
+    );
+    context.arc(centerX, centerY, 30, 0, Math.PI * 2, false);
+    context.fill();
+
+    // Draw cannon
+    context.lineWidth = 2;
+    context.strokeStyle = "#0000ff";
+    context.beginPath();
+    context.moveTo(centerX, centerY);
+    context.lineTo(
+      centerX + 1.5 * level.tileWidth * Math.cos(degToRad(player.angle)),
+      centerY - 1.5 * level.tileHeight * Math.sin(degToRad(player.angle))
+    );
+    context.stroke();
   }
 
   init();
