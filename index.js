@@ -1,6 +1,7 @@
 import { getRandomLetter } from "./letters.js";
 import { degToRad, radToDeg } from "./angles.js";
 import { updateFps, renderFps } from "./fps.js";
+import { renderDebugInfo } from "./debug.js";
 
 window.onload = function () {
   const canvas = document.getElementById("viewport");
@@ -15,8 +16,9 @@ window.onload = function () {
 
   const gameStates = {
     idle: 0,
-    falling: 1,
-    removing: 2,
+    waitingForCollisionCheck: 1,
+    falling: 2,
+    removing: 3,
   };
   let gameState = gameStates.idle;
 
@@ -43,6 +45,7 @@ window.onload = function () {
     rowHeight: TILE_SIZE * Math.cos(degToRad(30)), // height of each row
     radius: TILE_SIZE / 2, // radius of the circle
     tiles: [], // 2d array to hold the tiles
+    availableTiles: [], // tiles that are available to be removed
   };
 
   const player = {
@@ -54,9 +57,13 @@ window.onload = function () {
   class Tile {
     fontSize = FONT_SIZE;
 
-    constructor(x, y, val) {
+    constructor(i, j, x, y, val) {
+      this.i = i;
+      this.j = j;
       this.x = x; // Not really used?
       this.y = y; // Not really used?
+      this.centerX = x + level.tileWidth / 2;
+      this.centerY = y + level.tileHeight / 2;
       this.val = val;
       this.shift = 0; // Shift the tile when removing
       this.velocity = 0; // Velocity when removing
@@ -88,13 +95,12 @@ window.onload = function () {
       level.tiles[i] = [];
       for (let j = 0; j < level.columns; j++) {
         const val = getRandomLetter();
-        level.tiles[i][j] = new Tile(
-          j * level.tileWidth,
-          i * level.rowHeight,
-          val
-        );
+        const { x, y } = getTileCoordinate(i, j);
+        level.tiles[i][j] = new Tile(i, j, x, y, val);
       }
     }
+
+    gameState = gameStates.waitingForCollisionCheck;
 
     main(0);
   }
@@ -117,6 +123,9 @@ window.onload = function () {
 
     if (gameState == gameStates.idle) {
       // Ready for player input
+    } else if (gameState == gameStates.waitingForCollisionCheck) {
+      findCollisions();
+      gameState = gameState.idle;
     } else if (gameState == gameStates.removing) {
       // Remove tiles and drop tiles
       stateRemoveTiles(dt);
@@ -130,6 +139,7 @@ window.onload = function () {
     renderPlayer();
     if (SHOW_FPS) {
       renderFps(context);
+      renderDebugInfo(context, player);
     }
   }
 
@@ -258,6 +268,52 @@ window.onload = function () {
     };
   }
 
+  function findCollisions() {
+    const availableTiles = {};
+    angleLoop: for (let angle = 65; angle < 110; angle += 1) {
+      for (let i = level.tiles.length - 1; i >= 0; i--) {
+        for (let j = 0; j < level.columns; j++) {
+          const tile = level.tiles[i][j];
+          if (tile && doesCollide(angle, tile)) {
+            availableTiles[`${i},${j}`] = tile;
+            continue angleLoop;
+          }
+        }
+      }
+    }
+    level.availableTiles = Object.values(availableTiles);
+  }
+
+  function doesCollide(angle, tile) {
+    let centerAngle = 0;
+    if (angle < 90) {
+      centerAngle = radToDeg(
+        Math.atan2(player.centerY - tile.centerY, tile.centerX - player.centerX)
+      );
+    } else if (angle >= 90 && angle < 180) {
+      centerAngle =
+        180 -
+        radToDeg(
+          Math.atan2(
+            player.centerY - tile.centerY,
+            player.centerX - tile.centerX
+          )
+        );
+    }
+    const distance = Math.sqrt(
+      Math.pow(player.centerX - tile.centerX, 2) +
+        Math.pow(player.centerY - tile.centerY, 2)
+    );
+    const beta = radToDeg(Math.asin(level.radius / distance));
+    const rightBound = centerAngle - beta;
+    const leftBound = centerAngle + beta;
+    if (angle >= rightBound && angle <= leftBound) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
   function onMouseMove(e) {
     // Get the mouse position
     let pos = getMousePos(canvas, e);
@@ -283,7 +339,7 @@ window.onload = function () {
 
     if (mouseAngle < 270 && mouseAngle > lBound) {
       mouseAngle = lBound;
-    } else if (mouseAngle > 90 && mouseAngle < rBound) {
+    } else if (mouseAngle > 270 || mouseAngle < rBound) {
       mouseAngle = rBound;
     }
 
