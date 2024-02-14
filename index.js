@@ -59,6 +59,25 @@ window.onload = function () {
   const FLOOR_HEIGHT = 5;
   const TURRET_HEIGHT = 36;
 
+  var neighborOffsets = [
+    [
+      [0, 1], // right
+      [0, -1], // left
+      [1, 0], // down
+      [-1, 0], // up
+      [1, 1], // southeast
+      [-1, 1], // northeast
+    ], // odd row tiles
+    [
+      [0, 1], // right
+      [0, -1], // left
+      [1, 0], // down
+      [-1, 0], // up
+      [1, -1], // southwest
+      [-1, -1], // northwest
+    ],
+  ]; // even row tiles
+
   const level = {
     x: 0, // x posn
     y: 0, // y posn
@@ -199,7 +218,44 @@ window.onload = function () {
     removeTiles();
   }
 
-  function removeFloatingTiles() {}
+  function getNeighbors(i, j) {
+    const res = [];
+    for (const [x, y] of neighborOffsets[(i + rowOffset) % 2]) {
+      if (
+        i + x < 0 ||
+        i + x >= level.tiles.length ||
+        j + y < 0 ||
+        j + y >= level.columns
+      )
+        continue;
+      const neighbor = level.tiles[i + x][j + y];
+      if (neighbor) {
+        res.push(neighbor);
+      }
+    }
+    return res;
+  }
+
+  function removeFloatingTiles() {
+    for (let i = level.tiles.length - 1; i >= 0; i--) {
+      for (let j = 0; j < level.columns; j++) {
+        const tile = level.tiles[i][j];
+        if (tile) {
+          const neighbors = getNeighbors(i, j);
+          let isFloating = true;
+          for (const neighbor of neighbors) {
+            if (neighbor && !neighbor.shouldRemove) {
+              isFloating = false;
+              break;
+            }
+          }
+          if (isFloating) {
+            removeTile(i, j);
+          }
+        }
+      }
+    }
+  }
 
   function removeTiles() {
     gameState = gameStates.removing;
