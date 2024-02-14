@@ -188,10 +188,12 @@ window.onload = function () {
     removeTile(Math.floor(Math.random() * 3), Math.floor(Math.random() * 7));
 
   function stateRemoveTiles(dt) {
+    let removingTiles = false;
     for (let i = level.tiles.length - 1; i >= 0; i--) {
       for (let j = 0; j < level.columns; j++) {
         const tile = level.tiles[i][j];
         if (tile && tile.shouldRemove) {
+          removingTiles = true;
           tile.velocity += 1000 * dt;
           tile.shift += tile.velocity * dt;
           const tileY = getTileCoordinate(i, j).y + tile.shift;
@@ -199,11 +201,12 @@ window.onload = function () {
           if (tileY > level.height - TILE_SIZE) {
             // Remove the tile when it's below the floor
             level.tiles[i][j] = null;
-
-            gameState = gameStates.waitingForCollisionCheck;
           }
         }
       }
+    }
+    if (!removingTiles) {
+      gameState = gameStates.waitingForCollisionCheck;
     }
   }
 
