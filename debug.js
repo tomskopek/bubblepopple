@@ -4,4 +4,5 @@ export function renderDebugInfo(context, player) {
   context.fillStyle = "black";
   context.font = "18px Times";
   context.fillText(`Angle: ${Math.round(player.angle)}`, 400, 100);
+  context.fillText(`Word: ${player.word.map(t => t.val)}`, 400, 120);
 }

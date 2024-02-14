@@ -52,6 +52,7 @@ window.onload = function () {
     centerX: 0, // gets calculated
     centerY: 0, // gets calculated
     angle: 0,
+    word: [],
   };
 
   class Tile {
@@ -71,10 +72,20 @@ window.onload = function () {
     }
 
     remove() {
+      // find corresponding tile in level.tiles and remove it
+      const tile = level.tiles[this.i][this.j];
       console.log(`remove: ${this.val}`);
-      this.shift = 1;
-      this.velocity = DROP_SPEED;
-      this.state = "remove";
+      tile.shift = 1;
+      tile.velocity = DROP_SPEED;
+      tile.state = "remove";
+    }
+
+    target() {
+      this.state = "target";
+    }
+
+    isAvailable() {
+      return this.state != "target";
     }
 
     get shouldRemove() {
@@ -84,6 +95,8 @@ window.onload = function () {
 
   function init() {
     canvas.addEventListener("mousemove", onMouseMove);
+    // listen for typing
+    document.addEventListener("keydown", onKeyDown);
 
     level.width = level.columns * level.tileWidth + level.tileWidth / 2;
     level.height = canvas.height;
@@ -127,7 +140,6 @@ window.onload = function () {
       findCollisions();
       gameState = gameState.idle;
     } else if (gameState == gameStates.removing) {
-      // Remove tiles and drop tiles
       stateRemoveTiles(dt);
     }
   }
@@ -176,7 +188,6 @@ window.onload = function () {
     removeTile(Math.floor(Math.random() * 3), Math.floor(Math.random() * 7));
 
   function stateRemoveTiles(dt) {
-    // Remove tiles and drop tiles
     for (let i = level.tiles.length - 1; i >= 0; i--) {
       for (let j = 0; j < level.columns; j++) {
         const tile = level.tiles[i][j];
@@ -188,11 +199,12 @@ window.onload = function () {
           if (tileY > level.height - TILE_SIZE) {
             // Remove the tile when it's below the floor
             level.tiles[i][j] = null;
+
+            gameState = gameStates.waitingForCollisionCheck;
           }
         }
       }
     }
-    render();
   }
 
   function renderFrame() {
@@ -242,7 +254,9 @@ window.onload = function () {
             Math.PI * 2,
             false
           );
-          if (level.availableTiles.includes(tile)) {
+          if (tile.state == "target") {
+            context.fillStyle = "#ff0000";
+          } else if (level.availableTiles.includes(tile)) {
             context.fillStyle = "#ddd";
           }
           context.fill();
@@ -314,6 +328,32 @@ window.onload = function () {
       return true;
     } else {
       return false;
+    }
+  }
+
+  function onKeyDown(e) {
+    const key = e.key.toUpperCase();
+
+    if (key === "BACKSPACE") {
+      const lastTile = player.word.slice(-1);
+      lastTile[0].state = "idle";
+      player.word = player.word.slice(0, -1);
+    } else if (key === "TAB") {
+      // TODO: target another tile
+    } else if (key === "ENTER") {
+      for (const tile of player.word) {
+        removeTile(tile.i, tile.j);
+        removeTiles();
+        player.word = [];
+      }
+    } else if (key.match(/[A-Z]/)) {
+      for (const tile of level.availableTiles) {
+        if (tile.val === key && tile.isAvailable()) {
+          tile.target();
+          player.word.push(tile);
+          break;
+        }
+      }
     }
   }
 
