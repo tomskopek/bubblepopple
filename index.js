@@ -232,7 +232,7 @@ window.onload = function () {
           //     console.log(tileY);
           //   }
           // Draw the tile
-          context.fillStyle = "#ddd";
+          context.fillStyle = "#eee";
           context.beginPath();
           context.arc(
             tileX + level.radius,
@@ -242,6 +242,9 @@ window.onload = function () {
             Math.PI * 2,
             false
           );
+          if (level.availableTiles.includes(tile)) {
+            context.fillStyle = "#ddd";
+          }
           context.fill();
           context.font = `${tile.fontSize}px Times`;
           context.fillStyle = "#000";
