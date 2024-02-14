@@ -3,6 +3,31 @@ import { degToRad, radToDeg } from "./angles.js";
 import { updateFps, renderFps } from "./fps.js";
 import { renderDebugInfo } from "./debug.js";
 
+const colors = {
+  beige1: "#eee1c4",
+  beige2: "#e6d9bd",
+  beige3: "#dbcfb1",
+  beige4: "#d6c7a3",
+  beige5: "#c3b797",
+  beige6: "#ada387",
+  brown1: "#cc9970",
+  brown2: "#a97e5c",
+  brown3: "#937b6a",
+  gray1: "#a0a0a0",
+  gray2: "#838383",
+  blue1: "#9eb5c0",
+  blue2: "#839ca9",
+  blue3: "#6d838e",
+  red1: "#c87e7e",
+  red2: "#a05e5e",
+  purple1: "#b089ab",
+  purple2: "#8e6d89",
+  yellow1: "#b9ab73",
+  yellow2: "#978c63",
+  green1: "#87a985",
+  green2: "#6f8b6e",
+};
+
 window.onload = function () {
   const canvas = document.getElementById("viewport");
   const context = canvas.getContext("2d");
@@ -247,7 +272,7 @@ window.onload = function () {
           //     console.log(tileY);
           //   }
           // Draw the tile
-          context.fillStyle = "#eee";
+          context.fillStyle = colors.gray1;
           context.beginPath();
           context.arc(
             tileX + level.radius,
@@ -257,10 +282,15 @@ window.onload = function () {
             Math.PI * 2,
             false
           );
-          if (tile.state == "target") {
-            context.fillStyle = "#ff0000";
+          if (
+            tile.state == "target" &&
+            player.word[player.word.length - 1] == tile
+          ) {
+            context.fillStyle = colors.green2;
+          } else if (tile.state == "target") {
+            context.fillStyle = colors.green1;
           } else if (level.availableTiles.includes(tile)) {
-            context.fillStyle = "#ddd";
+            context.fillStyle = colors.beige2;
           }
           context.fill();
           context.font = `${tile.fontSize}px Times`;
