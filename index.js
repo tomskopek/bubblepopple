@@ -45,6 +45,8 @@ window.onload = function () {
     waitingForCollisionCheck: 1.1,
     falling: 2,
     removing: 3,
+    lose: 4,
+    win: 5,
   };
   let gameState = gameStates.idle;
 
@@ -88,7 +90,7 @@ window.onload = function () {
     width: 0, // width - gets calculated
     height: 0, // height - gets calculated
     columns: 7, // number of columns
-    rows: 10, // number of possible rows in the level
+    // rows: 10, // number of possible rows in the level - TODO: not used currently, but do we want this to control the height of the level?
     startingRows: 3, // number of rows to start with
     tileWidth: TILE_SIZE, // width of each tile
     tileHeight: TILE_SIZE, // height of each tile
@@ -181,15 +183,22 @@ window.onload = function () {
     updateFps(dt);
 
     if (gameState == gameStates.idle) {
+      checkWin();
+      checkLose();
+      clearEmptyRow();
       // Ready for player input
     } else if (gameState == gameStates.animateCollisionCheck) {
       animateAim(dt);
     } else if (gameState == gameStates.waitingForCollisionCheck) {
       player.angle = 90;
       findCollisions();
-      gameState = gameState.idle;
+      gameState = gameStates.idle;
     } else if (gameState == gameStates.removing) {
       stateRemoveTiles(dt);
+    } else if (gameState == gameStates.lose) {
+      console.log("You lose!");
+    } else if (gameState == gameStates.win) {
+      console.log("You win!");
     }
   }
 
@@ -356,7 +365,7 @@ window.onload = function () {
 
   function renderTiles() {
     // Top to bottom
-    for (let i = 0; i < level.rows; i++) {
+    for (let i = 0; i < level.tiles.length; i++) {
       for (let j = 0; j < level.columns; j++) {
         const row = level.tiles[i];
         if (!row) continue;
@@ -459,6 +468,39 @@ window.onload = function () {
     } else {
       return false;
     }
+  }
+
+  function clearEmptyRow() {
+    for (let i = level.tiles.length - 1; i >= 0; i--) {
+      if (level.tiles[i].every((tile) => !tile)) {
+        level.tiles.splice(i, 1);
+      } else {
+        break;
+      }
+    }
+  }
+
+  function checkLose() {
+    const lastRowIdx = level.tiles.length - 1;
+    for (let j = 0; j < level.columns; j++) {
+      if (level.tiles[lastRowIdx][j]) {
+        const { y } = getTileCoordinate(lastRowIdx, j);
+        if (y + level.tileHeight > player.centerY - level.tileHeight / 2) {
+          gameState = gameStates.lose;
+        }
+      }
+    }
+  }
+
+  function checkWin() {
+    for (let i = level.tiles.length - 1; i >= 0; i--) {
+      for (let j = 0; j < level.columns; j++) {
+        if (level.tiles[i][j]) {
+          return false;
+        }
+      }
+    }
+    gameState = gameStates.win;
   }
 
   function resetWord() {
@@ -564,7 +606,7 @@ window.onload = function () {
 
     // Draw dashed line representing bullet path
     context.setLineDash([5, 15]);
-    context.strokeStyle = colors.blue2
+    context.strokeStyle = colors.blue2;
     context.beginPath();
     context.moveTo(
       centerX + 1.2 * level.tileWidth * Math.cos(degToRad(player.angle)),
