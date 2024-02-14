@@ -47,6 +47,8 @@ window.onload = function () {
   };
   let gameState = gameStates.idle;
 
+  let rowOffset = 0;
+
   // Options
   const SHOW_FPS = true;
 
@@ -94,15 +96,6 @@ window.onload = function () {
       this.shift = 0; // Shift the tile when removing
       this.velocity = 0; // Velocity when removing
       this.state = "idle";
-    }
-
-    remove() {
-      // find corresponding tile in level.tiles and remove it
-      const tile = level.tiles[this.i][this.j];
-      console.log(`remove: ${this.val}`);
-      tile.shift = 1;
-      tile.velocity = DROP_SPEED;
-      tile.state = "remove";
     }
 
     target() {
@@ -183,7 +176,7 @@ window.onload = function () {
   function getTileCoordinate(row, col) {
     let x = col * level.tileWidth;
     // If the row is even, the x position is shifted over
-    if (row % 2 === 0) {
+    if ((row + rowOffset) % 2 === 0) {
       x += level.tileWidth / 2;
     }
     const y = row * level.rowHeight;
@@ -200,9 +193,13 @@ window.onload = function () {
 
   function removeTile(row, col) {
     const tile = level.tiles[row][col];
-    tile.remove();
+    tile.state = "remove";
+    tile.shift = 1;
+    tile.velocity = DROP_SPEED;
     removeTiles();
   }
+
+  function removeFloatingTiles() {}
 
   function removeTiles() {
     gameState = gameStates.removing;
@@ -211,6 +208,27 @@ window.onload = function () {
   // TODO: Remove this tmp helper
   window.foo = () =>
     removeTile(Math.floor(Math.random() * 3), Math.floor(Math.random() * 7));
+
+  function addRow() {
+    rowOffset = rowOffset === 0 ? 1 : 0;
+    level.tiles.unshift([]);
+    for (let j = 0; j < level.columns; j++) {
+      const val = getRandomLetter();
+      const { x, y } = getTileCoordinate(0, j);
+      level.tiles[0][j] = new Tile(0, j, x, y, val);
+    }
+    // shift i of all tiles
+    for (let i = 1; i < level.tiles.length; i++) {
+      for (let j = 0; j < level.columns; j++) {
+        const tile = level.tiles[i][j];
+        if (tile) {
+          tile.i++;
+        }
+      }
+    }
+    // Recalculate available tiles
+    gameState = gameStates.waitingForCollisionCheck;
+  }
 
   function stateRemoveTiles(dt) {
     let removingTiles = false;
@@ -364,21 +382,31 @@ window.onload = function () {
     }
   }
 
+  function resetWord() {
+    for (const tile of player.word) {
+      tile.state = "idle";
+    }
+    player.word = [];
+  }
+
   function onKeyDown(e) {
     const key = e.key.toUpperCase();
-
     if (key === "BACKSPACE") {
       const lastTile = player.word.slice(-1);
       lastTile[0].state = "idle";
       player.word = player.word.slice(0, -1);
+    } else if (key === " ") {
+      addRow();
+      resetWord();
     } else if (key === "TAB") {
       // TODO: target another tile
     } else if (key === "ENTER") {
       for (const tile of player.word) {
         removeTile(tile.i, tile.j);
-        removeTiles();
-        player.word = [];
       }
+      removeFloatingTiles();
+      removeTiles();
+      player.word = [];
     } else if (key.match(/[A-Z]/)) {
       for (const tile of level.availableTiles) {
         if (tile.val === key && tile.isAvailable()) {
