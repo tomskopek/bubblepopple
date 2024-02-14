@@ -41,7 +41,8 @@ window.onload = function () {
 
   const gameStates = {
     idle: 0,
-    waitingForCollisionCheck: 1,
+    animateCollisionCheck: 1.0,
+    waitingForCollisionCheck: 1.1,
     falling: 2,
     removing: 3,
   };
@@ -58,6 +59,9 @@ window.onload = function () {
 
   const FLOOR_HEIGHT = 5;
   const TURRET_HEIGHT = 36;
+
+  const leftBound = 172;
+  const rightBound = 8;
 
   var neighborOffsets = [
     [
@@ -150,7 +154,7 @@ window.onload = function () {
       }
     }
 
-    gameState = gameStates.waitingForCollisionCheck;
+    newRound();
 
     main(0);
   }
@@ -165,6 +169,11 @@ window.onload = function () {
     render();
   }
 
+  function newRound() {
+    player.angle = leftBound - 1;
+    gameState = gameStates.animateCollisionCheck;
+  }
+
   function update(tframe) {
     const dt = (tframe - lastFrame) / 1000;
     lastFrame = tframe;
@@ -173,7 +182,10 @@ window.onload = function () {
 
     if (gameState == gameStates.idle) {
       // Ready for player input
+    } else if (gameState == gameStates.animateCollisionCheck) {
+      animateAim(dt);
     } else if (gameState == gameStates.waitingForCollisionCheck) {
+      player.angle = 90;
       findCollisions();
       gameState = gameState.idle;
     } else if (gameState == gameStates.removing) {
@@ -266,6 +278,16 @@ window.onload = function () {
     removeTile(Math.floor(Math.random() * 3), Math.floor(Math.random() * 7));
 
   function addRow() {
+    // remove any falling tiles
+    for (let i = level.tiles.length - 1; i >= 0; i--) {
+      for (let j = 0; j < level.columns; j++) {
+        const tile = level.tiles[i][j];
+        if (tile && tile.state == "remove") {
+          level.tiles[i][j] = null;
+        }
+      }
+    }
+
     rowOffset = rowOffset === 0 ? 1 : 0;
     level.tiles.unshift([]);
     for (let j = 0; j < level.columns; j++) {
@@ -282,8 +304,9 @@ window.onload = function () {
         }
       }
     }
+
     // Recalculate available tiles
-    gameState = gameStates.waitingForCollisionCheck;
+    newRound();
   }
 
   function stateRemoveTiles(dt) {
@@ -305,7 +328,7 @@ window.onload = function () {
       }
     }
     if (!removingTiles) {
-      gameState = gameStates.waitingForCollisionCheck;
+      newRound();
     }
   }
 
@@ -474,6 +497,13 @@ window.onload = function () {
     }
   }
 
+  function animateAim(dt) {
+    player.angle -= dt * 400;
+    if (player.angle < rightBound) {
+      gameState = gameStates.waitingForCollisionCheck;
+    }
+  }
+
   function onMouseMove(e) {
     // Get the mouse position
     let pos = getMousePos(canvas, e);
@@ -494,13 +524,10 @@ window.onload = function () {
     //      \___/
     //       270
 
-    const lBound = 172;
-    const rBound = 8;
-
-    if (mouseAngle < 270 && mouseAngle > lBound) {
-      mouseAngle = lBound;
-    } else if (mouseAngle > 270 || mouseAngle < rBound) {
-      mouseAngle = rBound;
+    if (mouseAngle < 270 && mouseAngle > leftBound) {
+      mouseAngle = leftBound;
+    } else if (mouseAngle > 270 || mouseAngle < rightBound) {
+      mouseAngle = rightBound;
     }
 
     player.angle = mouseAngle;
@@ -525,12 +552,27 @@ window.onload = function () {
 
     // Draw cannon
     context.lineWidth = 2;
-    context.strokeStyle = "#0000ff";
+    context.strokeStyle = "#000";
+    context.setLineDash([0, 0]);
     context.beginPath();
     context.moveTo(centerX, centerY);
     context.lineTo(
-      centerX + 1.5 * level.tileWidth * Math.cos(degToRad(player.angle)),
-      centerY - 1.5 * level.tileHeight * Math.sin(degToRad(player.angle))
+      centerX + 1 * level.tileWidth * Math.cos(degToRad(player.angle)),
+      centerY - 1 * level.tileHeight * Math.sin(degToRad(player.angle))
+    );
+    context.stroke();
+
+    // Draw dashed line representing bullet path
+    context.setLineDash([5, 15]);
+    context.strokeStyle = colors.blue2
+    context.beginPath();
+    context.moveTo(
+      centerX + 1.2 * level.tileWidth * Math.cos(degToRad(player.angle)),
+      centerY - 1.2 * level.tileHeight * Math.sin(degToRad(player.angle))
+    );
+    context.lineTo(
+      centerX + 4 * level.tileWidth * Math.cos(degToRad(player.angle)),
+      centerY - 4 * level.tileHeight * Math.sin(degToRad(player.angle))
     );
     context.stroke();
   }
