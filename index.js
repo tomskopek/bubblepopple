@@ -14,6 +14,7 @@ const colors = {
   brown1: "#cc9970",
   brown2: "#a97e5c",
   brown3: "#937b6a",
+  unavailableTile: "#f0f0f0",
   gray1: "#a0a0a0",
   gray2: "#838383",
   blue1: "#9eb5c0",
@@ -54,7 +55,8 @@ window.onload = function () {
   let rowOffset = 0;
 
   // Options
-  const SHOW_DEBUG_INFO = true;
+  const SHOW_FPS = true;
+  const SHOW_DEBUG_INFO = false;
 
   const TILE_SIZE = 50;
   const FONT_SIZE = 24;
@@ -187,6 +189,14 @@ window.onload = function () {
         addRow();
       });
 
+    document.getElementById("backspace").addEventListener("click", function () {
+      deleteLastLetter();
+    });
+
+    document.getElementById("enter").addEventListener("click", function () {
+      submitWord();
+    });
+
     "abcdefghijklmnopqrstuvwxyz".split("").forEach((char) => {
       // add click listener to each letter
       document.getElementById(char).addEventListener("click", function () {
@@ -268,7 +278,8 @@ window.onload = function () {
       if (tile && availableTiles.includes(tile)) {
         document.getElementById(char).style.backgroundColor = colors.beige2;
       } else {
-        document.getElementById(char).style.backgroundColor = colors.gray1;
+        document.getElementById(char).style.backgroundColor =
+          colors.unavailableTile;
       }
     }
   }
@@ -288,10 +299,8 @@ window.onload = function () {
     renderPlayer();
     renderWord();
     styleKeyboard();
-    if (SHOW_DEBUG_INFO) {
-      renderFps(context);
-      renderDebugInfo(context, player);
-    }
+    if (SHOW_FPS) renderFps(context);
+    if (SHOW_DEBUG_INFO) renderDebugInfo(context, player);
   }
 
   function getTileCoordinate(row, col) {
@@ -455,7 +464,7 @@ window.onload = function () {
           //     console.log(tileY);
           //   }
           // Draw the tile
-          context.fillStyle = colors.gray1;
+          context.fillStyle = colors.unavailableTile;
           context.beginPath();
           context.arc(
             tileX + level.radius,
@@ -587,6 +596,31 @@ window.onload = function () {
     player.word = [];
   }
 
+  function submitWord() {
+    const word = player.word
+      .map((t) => t.val)
+      .join("")
+      .toLowerCase();
+    const isWord = findSuccinctWord(word);
+    if (isWord) {
+      for (const tile of player.word) {
+        removeTile(tile.i, tile.j);
+      }
+      removeFloatingTiles();
+      removeTiles();
+      player.word = [];
+    } else {
+      // TODO: animate deny word briefly
+      resetWord();
+    }
+  }
+
+  function deleteLastLetter() {
+    const lastTile = player.word.slice(-1);
+    lastTile[0].state = "idle";
+    player.word = player.word.slice(0, -1);
+  }
+
   function onKeyDown(e) {
     if (gameState == gameStates.lose || gameState == gameStates.win) {
       resetLevel();
@@ -594,31 +628,14 @@ window.onload = function () {
     }
     const key = e.key.toUpperCase();
     if (key === "BACKSPACE") {
-      const lastTile = player.word.slice(-1);
-      lastTile[0].state = "idle";
-      player.word = player.word.slice(0, -1);
+      deleteLastLetter();
     } else if (key === " ") {
       addRow();
       resetWord();
     } else if (key === "TAB") {
       // TODO: target another tile
     } else if (key === "ENTER") {
-      const word = player.word
-        .map((t) => t.val)
-        .join("")
-        .toLowerCase();
-      const isWord = findSuccinctWord(word);
-      if (isWord) {
-        for (const tile of player.word) {
-          removeTile(tile.i, tile.j);
-        }
-        removeFloatingTiles();
-        removeTiles();
-        player.word = [];
-      } else {
-        // TODO: animate deny word briefly
-        resetWord();
-      }
+      submitWord();
     } else if (key.match(/[A-Z]/)) {
       for (const tile of level.availableTiles) {
         if (tile.val === key && tile.isAvailable()) {
