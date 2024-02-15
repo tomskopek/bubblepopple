@@ -112,13 +112,13 @@ window.onload = function () {
     fontSize = FONT_SIZE;
 
     constructor(i, j, x, y, val) {
+      this.val = val;
       this.i = i;
       this.j = j;
       this.x = x; // Not really used?
       this.y = y; // Not really used?
       this.centerX = x + level.tileWidth / 2;
       this.centerY = y + level.tileHeight / 2;
-      this.val = val;
       this.shift = 0; // Shift the tile when removing
       this.velocity = 0; // Velocity when removing
       this.state = "idle";
@@ -128,8 +128,15 @@ window.onload = function () {
       this.state = "target";
     }
 
+    untarget() {
+      // find index of word in player.word, starting from end, and remove it
+      const idx = player.word.lastIndexOf(this);
+      player.word.splice(idx, 1);
+      this.state = "idle";
+    }
+
     isAvailable() {
-      return this.state != "target";
+      return level.availableTiles.includes(this) && this.state != "target";
     }
 
     get shouldRemove() {
@@ -140,6 +147,7 @@ window.onload = function () {
   function init() {
     buildDict();
     canvas.addEventListener("mousemove", onMouseMove);
+    canvas.addEventListener("mousedown", onMouseDown);
     // listen for typing
     document.addEventListener("keydown", onKeyDown);
 
@@ -190,7 +198,8 @@ window.onload = function () {
       clearEmptyRow();
       // Ready for player input
     } else if (gameState == gameStates.animateCollisionCheck) {
-      animateAim(dt);
+      // animateAim(dt); // TODO: Refine this and bring it back. at the moment it's just worse than nothing
+      gameState = gameStates.waitingForCollisionCheck;
     } else if (gameState == gameStates.waitingForCollisionCheck) {
       player.angle = 90;
       findCollisions();
@@ -585,6 +594,44 @@ window.onload = function () {
     }
 
     player.angle = mouseAngle;
+  }
+
+  function onMouseDown(e) {
+    // Get the mouse position
+    let pos = getMousePos(canvas, e);
+
+    // Get the tile underneath the mouse
+    let tile = getTileUnderneathMouse(pos.x, pos.y);
+
+    // If the tile is available, target it
+    if (tile) {
+      if (tile.isAvailable()) {
+        tile.target();
+        player.word.push(tile);
+      } else if (tile.state == "target") {
+        tile.untarget();
+      }
+    }
+  }
+
+  function getTileUnderneathMouse(x, y) {
+    for (let i = level.tiles.length - 1; i >= 0; i--) {
+      for (let j = 0; j < level.columns; j++) {
+        const tile = level.tiles[i][j];
+        if (tile) {
+          const { x: tileX, y: tileY } = getTileCoordinate(i, j);
+          if (
+            x > tileX &&
+            x < tileX + level.tileWidth &&
+            y > tileY &&
+            y < tileY + level.tileHeight
+          ) {
+            return tile;
+            break;
+          }
+        }
+      }
+    }
   }
 
   function renderPlayer() {
