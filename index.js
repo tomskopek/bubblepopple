@@ -60,8 +60,10 @@ window.onload = function () {
   const FONT_SIZE = 24;
   const DROP_SPEED = 1000;
 
-  const FLOOR_HEIGHT = 5;
+  const FLOOR_HEIGHT = 50;
   const TURRET_HEIGHT = 36;
+
+  const WORD_PREVIEW_BUBBLE_RADIUS = 20;
 
   const leftBound = 172;
   const rightBound = 8;
@@ -218,6 +220,7 @@ window.onload = function () {
     renderFrame();
     renderTiles();
     renderPlayer();
+    renderWord();
     if (SHOW_FPS) {
       renderFps(context);
       renderDebugInfo(context, player);
@@ -676,6 +679,27 @@ window.onload = function () {
       centerY - 4 * level.tileHeight * Math.sin(degToRad(player.angle))
     );
     context.stroke();
+  }
+
+  function renderCharBubble(char, x, y) {
+    context.fillStyle = colors.beige1;
+    context.beginPath();
+    context.arc(x, y, WORD_PREVIEW_BUBBLE_RADIUS, 0, Math.PI * 2, false);
+    context.fill();
+    context.font = `${WORD_PREVIEW_BUBBLE_RADIUS}px Times`;
+    context.fillStyle = "#000";
+    drawCenterText(char, WORD_PREVIEW_BUBBLE_RADIUS, x, y);
+  }
+
+  function renderWord() {
+    // render a bubbles for each letter of the current word
+    const CHAR_SPACE = WORD_PREVIEW_BUBBLE_RADIUS * 2;
+    for (let i = 0; i < player.word.length; i++) {
+      const tile = player.word[i];
+      const x = WORD_PREVIEW_BUBBLE_RADIUS + i * CHAR_SPACE;
+      const y = level.height - FLOOR_HEIGHT / 2;
+      renderCharBubble(tile.val, x, y);
+    }
   }
 
   init();
