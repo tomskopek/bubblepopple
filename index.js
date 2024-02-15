@@ -296,10 +296,6 @@ window.onload = function () {
     gameState = gameStates.removing;
   }
 
-  // TODO: Remove this tmp helper
-  window.foo = () =>
-    removeTile(Math.floor(Math.random() * 3), Math.floor(Math.random() * 7));
-
   function addRow() {
     // remove any falling tiles
     for (let i = level.tiles.length - 1; i >= 0; i--) {
@@ -703,7 +699,4 @@ window.onload = function () {
   }
 
   init();
-
-  console.log("level.tiles");
-  console.log(level.tiles);
 };
