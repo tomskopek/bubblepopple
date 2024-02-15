@@ -146,6 +146,21 @@ window.onload = function () {
     }
   }
 
+  function resetLevel() {
+    rowOffset = 0;
+    level.tiles = [];
+    for (let i = 0; i < level.startingRows; i++) {
+      level.tiles[i] = [];
+      for (let j = 0; j < level.columns; j++) {
+        const val = getRandomLetter();
+        const { x, y } = getTileCoordinate(i, j);
+        level.tiles[i][j] = new Tile(i, j, x, y, val);
+      }
+    }
+    newRound();
+    main(0);
+  }
+
   function init() {
     buildDict();
     canvas.addEventListener("mousemove", onMouseMove);
@@ -158,23 +173,17 @@ window.onload = function () {
     player.centerX = level.width / 2;
     player.centerY = level.height - FLOOR_HEIGHT - TURRET_HEIGHT;
 
-    // Initialize the 2d array of tiles
-    for (let i = 0; i < level.startingRows; i++) {
-      level.tiles[i] = [];
-      for (let j = 0; j < level.columns; j++) {
-        const val = getRandomLetter();
-        const { x, y } = getTileCoordinate(i, j);
-        level.tiles[i][j] = new Tile(i, j, x, y, val);
-      }
-    }
-
+    resetLevel();
     newRound();
-
     main(0);
   }
 
   // Main game loop
   function main(tframe) {
+    if (gameState == gameStates.lose || gameState == gameStates.win) {
+      render();
+      return;
+    }
     window.requestAnimationFrame(main);
     // TODO: get rid of these. tmp for debugging
     window.level = level;
@@ -184,7 +193,7 @@ window.onload = function () {
   }
 
   function newRound() {
-    player.angle = leftBound - 1;
+    // player.angle = leftBound - 1;
     gameState = gameStates.animateCollisionCheck;
   }
 
@@ -209,14 +218,22 @@ window.onload = function () {
     } else if (gameState == gameStates.removing) {
       stateRemoveTiles(dt);
     } else if (gameState == gameStates.lose) {
-      console.log("You lose!");
+      renderLoseScreen();
     } else if (gameState == gameStates.win) {
-      console.log("You win!");
+      renderWinScreen();
     }
   }
 
   // Render the game
   function render() {
+    if (gameState == gameStates.lose) {
+      renderLoseScreen();
+      return;
+    }
+    if (gameState == gameStates.win) {
+      renderWinScreen();
+      return;
+    }
     renderFrame();
     renderTiles();
     renderPlayer();
@@ -521,6 +538,10 @@ window.onload = function () {
   }
 
   function onKeyDown(e) {
+    if (gameState == gameStates.lose || gameState == gameStates.win) {
+      resetLevel();
+      return;
+    }
     const key = e.key.toUpperCase();
     if (key === "BACKSPACE") {
       const lastTile = player.word.slice(-1);
@@ -696,6 +717,38 @@ window.onload = function () {
       const y = level.height - FLOOR_HEIGHT / 2;
       renderCharBubble(tile.val, x, y);
     }
+  }
+
+  function renderLoseScreen() {
+    context.fillStyle = colors.beige1;
+    context.fillRect(level.x, level.y, level.width, level.height);
+    context.fillStyle = "black";
+    context.font = "24px Times";
+    drawCenterText("You lose!", 24, level.width / 2, level.height / 2);
+    context.font = "20px Times";
+    drawCenterText(
+      "Press any key to restart",
+      24,
+      level.width / 2,
+      level.height / 2 + 30
+    );
+    context.fill();
+  }
+
+  function renderWinScreen() {
+    context.fillStyle = colors.beige1;
+    context.fillRect(level.x, level.y, level.width, level.height);
+    context.fillStyle = "black";
+    context.font = "24px Times";
+    drawCenterText("You win!", 24, level.width / 2, level.height / 2);
+    context.font = "20px Times";
+    drawCenterText(
+      "Press any key to restart",
+      24,
+      level.width / 2,
+      level.height / 2 + 30
+    );
+    context.fill();
   }
 
   init();
