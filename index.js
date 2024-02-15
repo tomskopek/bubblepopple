@@ -2,6 +2,7 @@ import { getRandomLetter } from "./letters.js";
 import { degToRad, radToDeg } from "./angles.js";
 import { updateFps, renderFps } from "./fps.js";
 import { renderDebugInfo } from "./debug.js";
+import { buildDict, findSuccinctWord } from "./dictionary/dictionary.js";
 
 const colors = {
   beige1: "#eee1c4",
@@ -137,6 +138,7 @@ window.onload = function () {
   }
 
   function init() {
+    buildDict();
     canvas.addEventListener("mousemove", onMouseMove);
     // listen for typing
     document.addEventListener("keydown", onKeyDown);
@@ -522,12 +524,22 @@ window.onload = function () {
     } else if (key === "TAB") {
       // TODO: target another tile
     } else if (key === "ENTER") {
-      for (const tile of player.word) {
-        removeTile(tile.i, tile.j);
+      const word = player.word
+        .map((t) => t.val)
+        .join("")
+        .toLowerCase();
+      const isWord = findSuccinctWord(word);
+      if (isWord) {
+        for (const tile of player.word) {
+          removeTile(tile.i, tile.j);
+        }
+        removeFloatingTiles();
+        removeTiles();
+        player.word = [];
+      } else {
+        // TODO: animate deny word briefly
+        resetWord();
       }
-      removeFloatingTiles();
-      removeTiles();
-      player.word = [];
     } else if (key.match(/[A-Z]/)) {
       for (const tile of level.availableTiles) {
         if (tile.val === key && tile.isAvailable()) {
