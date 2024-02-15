@@ -168,6 +168,8 @@ window.onload = function () {
     // listen for typing
     document.addEventListener("keydown", onKeyDown);
 
+    initKeyboard();
+
     level.width = level.columns * level.tileWidth + level.tileWidth / 2;
     level.height = canvas.height;
     player.centerX = level.width / 2;
@@ -176,6 +178,40 @@ window.onload = function () {
     resetLevel();
     newRound();
     main(0);
+  }
+
+  function initKeyboard() {
+    document
+      .getElementById("dumpButton")
+      .addEventListener("click", function () {
+        addRow();
+      });
+
+    "abcdefghijklmnopqrstuvwxyz".split("").forEach((char) => {
+      // add click listener to each letter
+      document.getElementById(char).addEventListener("click", function () {
+        const tile = findTileByChar(char);
+        console.log("tile");
+        console.log(tile);
+        if (tile) {
+          if (tile.isAvailable()) {
+            tile.target();
+            player.word.push(tile);
+          }
+        }
+      });
+    });
+  }
+
+  function findTileByChar(char) {
+    for (let i = level.tiles.length - 1; i >= 0; i--) {
+      for (let j = 0; j < level.columns; j++) {
+        const tile = level.tiles[i][j];
+        if (tile && tile.val.toLowerCase() === char) {
+          return tile;
+        }
+      }
+    }
   }
 
   // Main game loop
@@ -224,6 +260,19 @@ window.onload = function () {
     }
   }
 
+  function styleKeyboard() {
+    const availableTiles = level.availableTiles;
+    const allTiles = "abcdefghijklmnopqrstuvwxyz".split("");
+    for (const char of allTiles) {
+      const tile = findTileByChar(char);
+      if (tile && availableTiles.includes(tile)) {
+        document.getElementById(char).style.backgroundColor = colors.beige2;
+      } else {
+        document.getElementById(char).style.backgroundColor = colors.gray1;
+      }
+    }
+  }
+
   // Render the game
   function render() {
     if (gameState == gameStates.lose) {
@@ -238,6 +287,7 @@ window.onload = function () {
     renderTiles();
     renderPlayer();
     renderWord();
+    styleKeyboard();
     if (SHOW_DEBUG_INFO) {
       renderFps(context);
       renderDebugInfo(context, player);

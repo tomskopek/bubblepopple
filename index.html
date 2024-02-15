@@ -4,22 +4,54 @@
     <meta charset="UTF-8" />
     <title>Bubble Popple</title>
     <script type="module" src="index.js"></script>
+    <link rel="stylesheet" type="text/css" href="styles.css" />
   </head>
   <body>
-    <canvas id="viewport" width="628" height="628"></canvas>
-    <div id="keyboard">
-      <div id="row-1">
-        <!-- <button id="q">Q</button>
-        <button id="q">W</button>
-        <button id="q">E</button>
-        <button id="q">R</button>
-        <button id="q">T</button>
-        <button id="q">Y</button>
-        <button id="q">U</button>
-        <button id="q">I</button>
-        <button id="q">O</button>
-        <button id="q">P</button> -->
+    <div class="game">
+      <canvas id="viewport" width="628" height="628"></canvas>
+    </div>
+    <div id="keyboard" class="keyboard">
+      <div id="row-1" class="keyboard-row">
+        <button id="q" class="keyboard-button">Q</button>
+        <button id="w" class="keyboard-button">W</button>
+        <button id="e" class="keyboard-button">E</button>
+        <button id="r" class="keyboard-button">R</button>
+        <button id="t" class="keyboard-button">T</button>
+        <button id="y" class="keyboard-button">Y</button>
+        <button id="u" class="keyboard-button">U</button>
+        <button id="i" class="keyboard-button">I</button>
+        <button id="o" class="keyboard-button">O</button>
+        <button id="p" class="keyboard-button">P</button>
       </div>
+      <div id="row-2" class="keyboard-row">
+        <button id="a" class="keyboard-button">A</button>
+        <button id="s" class="keyboard-button">S</button>
+        <button id="d" class="keyboard-button">D</button>
+        <button id="f" class="keyboard-button">F</button>
+        <button id="g" class="keyboard-button">G</button>
+        <button id="h" class="keyboard-button">H</button>
+        <button id="j" class="keyboard-button">J</button>
+        <button id="k" class="keyboard-button">K</button>
+        <button id="l" class="keyboard-button">L</button>
+      </div>
+      <div id="row-3" class="keyboard-row">
+        <button id="z" class="keyboard-button">Z</button>
+        <button id="x" class="keyboard-button">X</button>
+        <button id="c" class="keyboard-button">C</button>
+        <button id="v" class="keyboard-button">V</button>
+        <button id="b" class="keyboard-button">B</button>
+        <button id="n" class="keyboard-button">N</button>
+        <button id="m" class="keyboard-button">M</button>
+      </div>
+      <div class="keyboard-row">
+        <button id="dumpButton" class="keyboard-button" style="width: 300px">
+          Add row
+        </button>
+      </div>
+    </div>
+    <div>
+      <p>Clear all the bubbles by forming words</p>
+      <p>Spacebar adds a new row</p>
     </div>
   </body>
 </html>
