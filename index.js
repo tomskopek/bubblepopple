@@ -54,7 +54,7 @@ window.onload = function () {
   let rowOffset = 0;
 
   // Options
-  const SHOW_FPS = true;
+  const SHOW_DEBUG_INFO = true;
 
   const TILE_SIZE = 50;
   const FONT_SIZE = 24;
@@ -221,7 +221,7 @@ window.onload = function () {
     renderTiles();
     renderPlayer();
     renderWord();
-    if (SHOW_FPS) {
+    if (SHOW_DEBUG_INFO) {
       renderFps(context);
       renderDebugInfo(context, player);
     }
