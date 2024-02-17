@@ -102,7 +102,7 @@ window.onload = function () {
     rowHeight: TILE_SIZE * Math.cos(degToRad(30)), // height of each row
     radius: TILE_SIZE / 2, // radius of the circle
     tiles: [], // 2d array to hold the tiles
-    availableTiles: [], // tiles that are available to be removed
+    reachableTiles: [], // tiles that can be reached by the turret
   };
 
   const player = {
@@ -140,7 +140,7 @@ window.onload = function () {
     }
 
     isAvailable() {
-      return level.availableTiles.includes(this) && this.state != "target";
+      return level.reachableTiles.includes(this) && this.state != "target";
     }
 
     get shouldRemove() {
@@ -268,11 +268,11 @@ window.onload = function () {
   }
 
   function styleKeyboard() {
-    const availableTiles = level.availableTiles;
+    const reachableTiles = level.reachableTiles;
     const allTiles = "abcdefghijklmnopqrstuvwxyz".split("");
     for (const char of allTiles) {
       const tile = findTileByChar(char);
-      if (tile && availableTiles.includes(tile)) {
+      if (tile && reachableTiles.includes(tile)) {
         document.getElementById(char).style.backgroundColor = colors.beige2;
       } else {
         document.getElementById(char).style.backgroundColor =
@@ -478,7 +478,7 @@ window.onload = function () {
             context.fillStyle = colors.green2;
           } else if (tile.state == "target") {
             context.fillStyle = colors.green1;
-          } else if (level.availableTiles.includes(tile)) {
+          } else if (level.reachableTiles.includes(tile)) {
             context.fillStyle = colors.beige2;
           }
           context.fill();
@@ -508,19 +508,19 @@ window.onload = function () {
   }
 
   function findCollisions() {
-    const availableTiles = {};
+    const reachableTiles = {};
     angleLoop: for (let angle = 65; angle < 110; angle += 1) {
       for (let i = level.tiles.length - 1; i >= 0; i--) {
         for (let j = 0; j < level.columns; j++) {
           const tile = level.tiles[i][j];
           if (tile && doesCollide(angle, tile)) {
-            availableTiles[`${i},${j}`] = tile;
+            reachableTiles[`${i},${j}`] = tile;
             continue angleLoop;
           }
         }
       }
     }
-    level.availableTiles = Object.values(availableTiles);
+    level.reachableTiles = Object.values(reachableTiles);
   }
 
   function doesCollide(angle, tile) {
@@ -634,7 +634,7 @@ window.onload = function () {
     } else if (key === "ENTER") {
       submitWord();
     } else if (key.match(/[A-Z]/)) {
-      for (const tile of level.availableTiles) {
+      for (const tile of level.reachableTiles) {
         if (tile.val === key && tile.isAvailable()) {
           tile.target();
           player.word.push(tile);
