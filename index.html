@@ -2,13 +2,19 @@
 <html>
   <head>
     <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, user-scalable=no"
+    />
     <title>Bubble Popple</title>
     <script type="module" src="index.js"></script>
     <link rel="stylesheet" type="text/css" href="styles.css" />
   </head>
   <body>
     <div class="game">
-      <canvas id="viewport" width="628" height="628"></canvas>
+      <div class="canvas-container">
+        <canvas class="canvas-viewport" id="canvas"></canvas>
+      </div>
       <div id="keyboard" class="keyboard">
         <div id="row-1" class="keyboard-row">
           <button id="q" class="keyboard-button">Q</button>
@@ -34,7 +40,7 @@
           <button id="l" class="keyboard-button">L</button>
         </div>
         <div id="row-3" class="keyboard-row">
-          <button id="enter" class="keyboard-button" style="width: 80px">
+          <button id="enter" class="keyboard-button keyboard-enter" style="">
             Enter
           </button>
           <button id="z" class="keyboard-button">Z</button>
@@ -44,7 +50,7 @@
           <button id="b" class="keyboard-button">B</button>
           <button id="n" class="keyboard-button">N</button>
           <button id="m" class="keyboard-button">M</button>
-          <button id="backspace" class="keyboard-button" style="width: 65px">
+          <button id="backspace" class="keyboard-button keyboard-del" style="">
             Del
           </button>
         </div>

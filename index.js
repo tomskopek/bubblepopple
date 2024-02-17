@@ -31,15 +31,13 @@ const colors = {
 };
 
 window.onload = function () {
-  const canvas = document.getElementById("viewport");
+  const canvas = document.getElementById("canvas");
   const context = canvas.getContext("2d");
 
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight * 0.6;
+
   let lastFrame = 0;
-
-  let initialized = false;
-
-  let animationState = 0;
-  let animationTime = 0;
 
   const gameStates = {
     idle: 0,
@@ -58,7 +56,8 @@ window.onload = function () {
   const SHOW_FPS = true;
   const SHOW_DEBUG_INFO = false;
 
-  const TILE_SIZE = 50;
+  const NUM_COLUMNS = 7;
+  const TILE_SIZE = Math.min(50, canvas.width / (NUM_COLUMNS + 0.5));
   const FONT_SIZE = 24;
   const DROP_SPEED = 1000;
 
@@ -94,7 +93,7 @@ window.onload = function () {
     y: 0, // y posn
     width: 0, // width - gets calculated
     height: 0, // height - gets calculated
-    columns: 7, // number of columns
+    columns: NUM_COLUMNS, // number of columns
     // rows: 10, // number of possible rows in the level - TODO: not used currently, but do we want this to control the height of the level?
     startingRows: 3, // number of rows to start with
     tileWidth: TILE_SIZE, // width of each tile
