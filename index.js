@@ -131,21 +131,23 @@ window.onload = function () {
 
     target() {
       this.state = "target";
+      level.availableChars[this.val] -= 1;
     }
 
     untarget() {
       // find index of word in player.word, starting from end, and remove it
       const idx = player.word.lastIndexOf(this);
+      level.availableChars[this.val] += 1;
       player.word.splice(idx, 1);
       this.state = "idle";
     }
 
     isReachable() {
-      return level.reachableTiles.includes(this)
+      return level.reachableTiles.includes(this);
     }
 
     isAvailable() {
-      return this.isReachable() && this.state == "idle"
+      return this.isReachable() && this.state == "idle";
     }
 
     get shouldRemove() {
@@ -262,6 +264,7 @@ window.onload = function () {
     } else if (gameState == gameStates.waitingForCollisionCheck) {
       player.angle = 90;
       findReachableTiles();
+      findAvailableChars();
       gameState = gameStates.idle;
     } else if (gameState == gameStates.removing) {
       stateRemoveTiles(dt);
@@ -272,13 +275,14 @@ window.onload = function () {
     }
   }
 
-  function styleKeyboard() {
-    const reachableTiles = level.reachableTiles;
+  function renderKeyboard() {
     const allTiles = "abcdefghijklmnopqrstuvwxyz".split("");
     for (const char of allTiles) {
       const tile = findTileByChar(char);
-      if (tile && reachableTiles.includes(tile)) {
+      if (tile && level.availableChars[char.toUpperCase()] > 0) {
         document.getElementById(char).style.backgroundColor = colors.beige2;
+      } else if (tile && level.reachableTiles.includes(tile)) {
+        document.getElementById(char).style.backgroundColor = colors.beige6;
       } else {
         document.getElementById(char).style.backgroundColor =
           colors.unavailableTile;
@@ -300,7 +304,7 @@ window.onload = function () {
     renderTiles();
     renderPlayer();
     renderWord();
-    styleKeyboard();
+    renderKeyboard();
     if (SHOW_FPS) renderFps(context, level);
     if (SHOW_DEBUG_INFO) renderDebugInfo(context, level, player);
   }
@@ -462,9 +466,6 @@ window.onload = function () {
           const shift = tile.shift || 0;
           let { x: tileX, y: tileY } = getTileCoordinate(i, j);
           tileY += shift;
-          //   if (tile.state == "remove") {
-          //     console.log(tileY);
-          //   }
           // Draw the tile
           context.fillStyle = colors.unavailableTile;
           context.beginPath();
@@ -526,6 +527,19 @@ window.onload = function () {
       }
     }
     level.reachableTiles = Object.values(reachableTiles);
+  }
+
+  function findAvailableChars() {
+    const availableChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+      .split("")
+      .reduce((acc, char) => {
+        acc[char] = 0;
+        return acc;
+      }, {});
+    for (const tile of level.reachableTiles) {
+      availableChars[tile.val] += 1;
+    }
+    level.availableChars = availableChars;
   }
 
   function doesCollide(angle, tile) {
@@ -618,9 +632,8 @@ window.onload = function () {
   }
 
   function deleteLastLetter() {
-    const lastTile = player.word.slice(-1);
-    lastTile[0].state = "idle";
-    player.word = player.word.slice(0, -1);
+    const lastTile = player.word.slice(-1)[0];
+    lastTile.untarget();
   }
 
   function onKeyDown(e) {
