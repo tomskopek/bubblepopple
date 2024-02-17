@@ -1,8 +1,15 @@
-export function renderDebugInfo(context, player) {
+export function renderDebugInfo(context, level, player) {
+  const width = 120;
+  const x = level.x + level.width - width;
+  const y = level.y + level.height - 50;
   context.fillStyle = "white";
-  context.fillRect(400, 100, 500, 100);
+  context.fillRect(x, y, width, 100);
   context.fillStyle = "black";
   context.font = "18px Times";
-  context.fillText(`Angle: ${Math.round(player.angle)}`, 400, 100);
-  context.fillText(`Word: ${player.word.map((t) => t.val).join("")}`, 400, 120);
+  context.fillText(`Angle: ${Math.round(player.angle)}`, x, y + 15);
+  context.fillText(
+    `Word: ${player.word.map((t) => t.val).join("")}`,
+    x,
+    y + 35
+  );
 }

@@ -12,10 +12,13 @@ export function updateFps(dt) {
   frameCount++;
 }
 
-export function renderFps(context) {
+export function renderFps(context, level) {
+  const width = 120;
+  const x = level.x + level.width - width;
+  const y = level.y + level.height - 100;
   context.fillStyle = "white";
-  context.fillRect(400, 0, 100, 100);
+  context.fillRect(x, y, width, 100);
   context.fillStyle = "black";
   context.font = "18px Times";
-  context.fillText(`FPS: ${fps}`, 400, 50);
+  context.fillText(`FPS: ${fps}`, x, y + 15);
 }

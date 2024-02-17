@@ -53,8 +53,8 @@ window.onload = function () {
   let rowOffset = 0;
 
   // Options
-  const SHOW_FPS = true;
-  const SHOW_DEBUG_INFO = false;
+  const SHOW_FPS = false;
+  const SHOW_DEBUG_INFO = true;
 
   const NUM_COLUMNS = 7;
   const TILE_SIZE = Math.min(50, canvas.width / (NUM_COLUMNS + 0.5));
@@ -89,7 +89,7 @@ window.onload = function () {
   ]; // even row tiles
 
   const level = {
-    x: 0, // x posn
+    x: 100, // x posn
     y: 0, // y posn
     width: 0, // width - gets calculated
     height: 0, // height - gets calculated
@@ -173,7 +173,7 @@ window.onload = function () {
 
     level.width = level.columns * level.tileWidth + level.tileWidth / 2;
     level.height = canvas.height;
-    player.centerX = level.width / 2;
+    player.centerX = level.x + level.width / 2;
     player.centerY = level.height - FLOOR_HEIGHT - TURRET_HEIGHT;
 
     resetLevel();
@@ -296,12 +296,12 @@ window.onload = function () {
     renderPlayer();
     renderWord();
     styleKeyboard();
-    if (SHOW_FPS) renderFps(context);
-    if (SHOW_DEBUG_INFO) renderDebugInfo(context, player);
+    if (SHOW_FPS) renderFps(context, level);
+    if (SHOW_DEBUG_INFO) renderDebugInfo(context, level, player);
   }
 
   function getTileCoordinate(row, col) {
-    let x = col * level.tileWidth;
+    let x = level.x + col * level.tileWidth;
     // If the row is even, the x position is shifted over
     if ((row + rowOffset) % 2 === 0) {
       x += level.tileWidth / 2;
@@ -660,6 +660,9 @@ window.onload = function () {
       Math.atan2(player.centerY - pos.y, pos.x - player.centerX)
     );
 
+    console.log('mouseAngle')
+    console.log(pos.x, player.centerX, mouseAngle);
+
     // Convert range to 0, 360 degrees
     if (mouseAngle < 0) {
       mouseAngle = 180 + (180 + mouseAngle);
@@ -720,7 +723,7 @@ window.onload = function () {
 
   function renderPlayer() {
     const TURRET_WIDTH = 60;
-    const centerX = level.width / 2;
+    const centerX = level.x + level.width / 2;
     const centerY = level.height - TURRET_HEIGHT - FLOOR_HEIGHT;
 
     // Draw turret
@@ -777,7 +780,7 @@ window.onload = function () {
     const CHAR_SPACE = WORD_PREVIEW_BUBBLE_RADIUS * 2;
     for (let i = 0; i < player.word.length; i++) {
       const tile = player.word[i];
-      const x = WORD_PREVIEW_BUBBLE_RADIUS + i * CHAR_SPACE;
+      const x = level.x + WORD_PREVIEW_BUBBLE_RADIUS + i * CHAR_SPACE;
       const y = level.height - FLOOR_HEIGHT / 2;
       renderCharBubble(tile.val, x, y);
     }
