@@ -643,6 +643,7 @@ window.onload = function () {
   }
 
   function deleteLastLetter() {
+    if (player.word.length === 0) return;
     const lastTile = player.word.slice(-1)[0];
     lastTile.untarget();
   }
