@@ -103,6 +103,7 @@ window.onload = function () {
     radius: TILE_SIZE / 2, // radius of the circle
     tiles: [], // 2d array to hold the tiles
     reachableTiles: [], // tiles that can be reached by the turret
+    availableChars: {}, // remaining chars that can be used to form words
   };
 
   const player = {
@@ -139,8 +140,12 @@ window.onload = function () {
       this.state = "idle";
     }
 
+    isReachable() {
+      return level.reachableTiles.includes(this)
+    }
+
     isAvailable() {
-      return level.reachableTiles.includes(this) && this.state != "target";
+      return this.isReachable() && this.state == "idle"
     }
 
     get shouldRemove() {
@@ -256,7 +261,7 @@ window.onload = function () {
       gameState = gameStates.waitingForCollisionCheck;
     } else if (gameState == gameStates.waitingForCollisionCheck) {
       player.angle = 90;
-      findCollisions();
+      findReachableTiles();
       gameState = gameStates.idle;
     } else if (gameState == gameStates.removing) {
       stateRemoveTiles(dt);
@@ -507,7 +512,7 @@ window.onload = function () {
     };
   }
 
-  function findCollisions() {
+  function findReachableTiles() {
     const reachableTiles = {};
     angleLoop: for (let angle = 65; angle < 110; angle += 1) {
       for (let i = level.tiles.length - 1; i >= 0; i--) {
