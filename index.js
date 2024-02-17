@@ -132,6 +132,8 @@ window.onload = function () {
     target() {
       this.state = "target";
       level.availableChars[this.val] -= 1;
+      const { x, y } = getTileCoordinate(this.i, this.j);
+      aimTurret(x, y);
     }
 
     untarget() {
@@ -140,6 +142,15 @@ window.onload = function () {
       level.availableChars[this.val] += 1;
       player.word.splice(idx, 1);
       this.state = "idle";
+
+      // aim at last tile in word
+      if (player.word.length > 0) {
+        const { x, y } = getTileCoordinate(
+          player.word[player.word.length - 1].i,
+          player.word[player.word.length - 1].j
+        );
+        aimTurret(x, y);
+      }
     }
 
     isReachable() {
@@ -778,6 +789,15 @@ window.onload = function () {
       centerY - 4 * level.tileHeight * Math.sin(degToRad(player.angle))
     );
     context.stroke();
+  }
+
+  function aimTurret(x, y) {
+    const dx = x - player.centerX;
+    const dy = player.centerY - y;
+    const angle = radToDeg(Math.atan2(dy, dx));
+    console.log("angle");
+    console.log(angle);
+    player.angle = angle;
   }
 
   function renderCharBubble(char, x, y) {
