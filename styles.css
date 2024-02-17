@@ -13,6 +13,7 @@ html {
   width: 100%;
   height: 100%;
   overflow: hidden;
+  -webkit-touch-callout: none; /* Disable double tap to zoom on Safari */
 }
 
 canvas {
@@ -71,7 +72,7 @@ canvas {
 }
 
 /* smaller screens */
-@media screen and (max-width: 600px) {
+@media screen and (max-width: 768px) {
   .keyboard-row {
     margin: 3px 0;
   }
