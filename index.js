@@ -200,8 +200,6 @@ window.onload = function () {
       // add click listener to each letter
       document.getElementById(char).addEventListener("click", function () {
         const tile = findTileByChar(char);
-        console.log("tile");
-        console.log(tile);
         if (tile) {
           if (tile.isAvailable()) {
             tile.target();
