@@ -73,6 +73,9 @@ canvas {
 
 /* smaller screens */
 @media screen and (max-width: 768px) {
+  .keyboard {
+    background-color: aqua;
+  }
   .keyboard-row {
     margin: 3px 0;
   }
