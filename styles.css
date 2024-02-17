@@ -18,12 +18,10 @@ html {
 canvas {
   display: block;
   margin: 0 auto;
-  background-color: #000000;
 }
 
 .canvas-container {
   height: 60%;
-  background-color: aqua;
 }
 
 .html-content {

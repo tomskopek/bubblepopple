@@ -58,6 +58,7 @@ window.onload = function () {
 
   const NUM_COLUMNS = 7;
   const TILE_SIZE = Math.min(50, canvas.width / (NUM_COLUMNS + 0.5));
+  const LEVEL_WIDTH = TILE_SIZE * (NUM_COLUMNS + 0.5);
   const FONT_SIZE = 24;
   const DROP_SPEED = 1000;
 
@@ -89,9 +90,9 @@ window.onload = function () {
   ]; // even row tiles
 
   const level = {
-    x: 100, // x posn
+    x: canvas.width / 2 - LEVEL_WIDTH / 2, // x posn
     y: 0, // y posn
-    width: 0, // width - gets calculated
+    width: LEVEL_WIDTH,
     height: 0, // height - gets calculated
     columns: NUM_COLUMNS, // number of columns
     // rows: 10, // number of possible rows in the level - TODO: not used currently, but do we want this to control the height of the level?
@@ -171,7 +172,6 @@ window.onload = function () {
 
     initKeyboard();
 
-    level.width = level.columns * level.tileWidth + level.tileWidth / 2;
     level.height = canvas.height;
     player.centerX = level.x + level.width / 2;
     player.centerY = level.height - FLOOR_HEIGHT - TURRET_HEIGHT;
