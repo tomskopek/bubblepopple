@@ -72,7 +72,6 @@ canvas {
 
 /* smaller screens */
 @media screen and (max-width: 600px) {
-
   .keyboard-row {
     margin: 3px 0;
   }

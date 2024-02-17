@@ -54,7 +54,7 @@ window.onload = function () {
 
   // Options
   const SHOW_FPS = false;
-  const SHOW_DEBUG_INFO = true;
+  const SHOW_DEBUG_INFO = false;
 
   const NUM_COLUMNS = 7;
   const TILE_SIZE = Math.min(50, canvas.width / (NUM_COLUMNS + 0.5));
@@ -659,9 +659,6 @@ window.onload = function () {
     let mouseAngle = radToDeg(
       Math.atan2(player.centerY - pos.y, pos.x - player.centerX)
     );
-
-    console.log('mouseAngle')
-    console.log(pos.x, player.centerX, mouseAngle);
 
     // Convert range to 0, 360 degrees
     if (mouseAngle < 0) {
