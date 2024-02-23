@@ -14,7 +14,6 @@ const colors = {
   brown1: "#cc9970",
   brown2: "#a97e5c",
   brown3: "#937b6a",
-  unavailableTile: "#f0f0f0",
   gray1: "#a0a0a0",
   gray2: "#838383",
   blue1: "#9eb5c0",
@@ -29,8 +28,11 @@ const colors = {
   green1: "#87a985",
   green2: "#6f8b6e",
 };
+colors.unavailableTile = colors.beige1;
+colors.reachableTile = colors.brown1;
+colors.reachableUnavailableKeyboard = colors.beige6;
 
-window.onload = function () {
+window.onload = function() {
   const canvas = document.getElementById("canvas");
   const context = canvas.getContext("2d");
 
@@ -54,7 +56,7 @@ window.onload = function () {
 
   // Options
   const SHOW_FPS = false;
-  const SHOW_DEBUG_INFO = false;
+  const SHOW_DEBUG_INFO = true;
 
   const NUM_COLUMNS = 7;
   const TILE_SIZE = Math.min(50, canvas.width / (NUM_COLUMNS + 0.5));
@@ -67,8 +69,8 @@ window.onload = function () {
 
   const WORD_PREVIEW_BUBBLE_RADIUS = 20;
 
-  const leftBound = 172;
-  const rightBound = 8;
+  const LEFT_BOUND = 172;
+  const RIGHT_BOUND = 8;
 
   var neighborOffsets = [
     [
@@ -109,31 +111,49 @@ window.onload = function () {
   const player = {
     centerX: 0, // gets calculated
     centerY: 0, // gets calculated
-    angle: 0,
+    mouseX: 0, // gets calculated
+    mouseY: 0, // gets calculated
+    angle: 0, // gets calculated
     word: [],
   };
 
   class Tile {
     fontSize = FONT_SIZE;
 
-    constructor(i, j, x, y, val) {
+    constructor(i, j, val) {
       this.val = val;
       this.i = i;
       this.j = j;
-      this.x = x; // Not really used?
-      this.y = y; // Not really used?
-      this.centerX = x + level.tileWidth / 2;
-      this.centerY = y + level.tileHeight / 2;
       this.shift = 0; // Shift the tile when removing
       this.velocity = 0; // Velocity when removing
       this.state = "idle";
     }
 
+    get x() {
+      const { x } = getTileCoordinate(this.i, this.j);
+      return x;
+    }
+
+    get y() {
+      const { y } = getTileCoordinate(this.i, this.j);
+      return y;
+    }
+
+    get centerX() {
+      const { centerX } = getTileCoordinate(this.i, this.j);
+      return centerX;
+    }
+
+    get centerY() {
+      const { centerY } = getTileCoordinate(this.i, this.j);
+      return centerY;
+    }
+
     target() {
       this.state = "target";
       level.availableChars[this.val] -= 1;
-      const { x, y } = getTileCoordinate(this.i, this.j);
-      aimTurret(x, y);
+      const { centerX, centerY } = getTileCoordinate(this.i, this.j);
+      aimTurret(centerX, centerY);
     }
 
     untarget() {
@@ -147,7 +167,7 @@ window.onload = function () {
       if (player.word.length > 0) {
         const { x, y } = getTileCoordinate(
           player.word[player.word.length - 1].i,
-          player.word[player.word.length - 1].j
+          player.word[player.word.length - 1].j,
         );
         aimTurret(x, y);
       }
@@ -174,7 +194,7 @@ window.onload = function () {
       for (let j = 0; j < level.columns; j++) {
         const val = getRandomLetter();
         const { x, y } = getTileCoordinate(i, j);
-        level.tiles[i][j] = new Tile(i, j, x, y, val);
+        level.tiles[i][j] = new Tile(i, j, val);
       }
     }
     newRound();
@@ -202,21 +222,21 @@ window.onload = function () {
   function initKeyboard() {
     document
       .getElementById("dumpButton")
-      .addEventListener("click", function () {
+      .addEventListener("click", function() {
         addRow();
       });
 
-    document.getElementById("backspace").addEventListener("click", function () {
+    document.getElementById("backspace").addEventListener("click", function() {
       deleteLastLetter();
     });
 
-    document.getElementById("enter").addEventListener("click", function () {
+    document.getElementById("enter").addEventListener("click", function() {
       submitWord();
     });
 
     "abcdefghijklmnopqrstuvwxyz".split("").forEach((char) => {
       // add click listener to each letter
-      document.getElementById(char).addEventListener("click", function () {
+      document.getElementById(char).addEventListener("click", function() {
         const tile = findTileByChar(char);
         if (tile) {
           if (tile.isAvailable()) {
@@ -254,7 +274,7 @@ window.onload = function () {
   }
 
   function newRound() {
-    // player.angle = leftBound - 1;
+    // player.angle = LEFT_BOUND - 1;
     gameState = gameStates.animateCollisionCheck;
   }
 
@@ -291,9 +311,9 @@ window.onload = function () {
     for (const char of allTiles) {
       const tile = findTileByChar(char);
       if (tile && level.availableChars[char.toUpperCase()] > 0) {
-        document.getElementById(char).style.backgroundColor = colors.beige2;
+        document.getElementById(char).style.backgroundColor = colors.reachableTile;
       } else if (tile && level.reachableTiles.includes(tile)) {
-        document.getElementById(char).style.backgroundColor = colors.beige6;
+        document.getElementById(char).style.backgroundColor = colors.reachableUnavailableKeyboard;
       } else {
         document.getElementById(char).style.backgroundColor =
           colors.unavailableTile;
@@ -327,7 +347,9 @@ window.onload = function () {
       x += level.tileWidth / 2;
     }
     const y = row * level.rowHeight;
-    return { x, y };
+    const centerX = x + level.tileWidth / 2;
+    const centerY = y + level.tileHeight / 2;
+    return { x, y, centerX, centerY };
   }
 
   function drawCenterText(text, fontSize, x, y) {
@@ -405,7 +427,7 @@ window.onload = function () {
     for (let j = 0; j < level.columns; j++) {
       const val = getRandomLetter();
       const { x, y } = getTileCoordinate(0, j);
-      level.tiles[0][j] = new Tile(0, j, x, y, val);
+      level.tiles[0][j] = new Tile(0, j, val);
     }
     // shift i of all tiles
     for (let i = 1; i < level.tiles.length; i++) {
@@ -449,7 +471,7 @@ window.onload = function () {
       0,
       0,
       level.width,
-      level.height
+      level.height,
     );
     gradient.addColorStop(0, "#fdfbfb"); // Light shade of gray
     gradient.addColorStop(1, "#ebedee"); // Slightly darker shade of gray
@@ -462,7 +484,7 @@ window.onload = function () {
       level.x,
       level.height - FLOOR_HEIGHT,
       level.width,
-      level.height
+      level.height,
     );
   }
 
@@ -486,7 +508,7 @@ window.onload = function () {
             level.radius,
             0,
             Math.PI * 2,
-            false
+            false,
           );
           if (
             tile.state == "target" &&
@@ -496,7 +518,7 @@ window.onload = function () {
           } else if (tile.state == "target") {
             context.fillStyle = colors.green1;
           } else if (level.reachableTiles.includes(tile)) {
-            context.fillStyle = colors.beige2;
+            context.fillStyle = colors.reachableTile;
           }
           context.fill();
           context.font = `${tile.fontSize}px Times`;
@@ -505,28 +527,29 @@ window.onload = function () {
             tile.val,
             tile.fontSize,
             tileX + level.radius,
-            tileY + level.radius
+            tileY + level.radius,
           );
         }
       }
     }
   }
+
   // Get the mouse position
   function getMousePos(canvas, e) {
     var rect = canvas.getBoundingClientRect();
     return {
       x: Math.round(
-        ((e.clientX - rect.left) / (rect.right - rect.left)) * canvas.width
+        ((e.clientX - rect.left) / (rect.right - rect.left)) * canvas.width,
       ),
       y: Math.round(
-        ((e.clientY - rect.top) / (rect.bottom - rect.top)) * canvas.height
+        ((e.clientY - rect.top) / (rect.bottom - rect.top)) * canvas.height,
       ),
     };
   }
 
   function findReachableTiles() {
     const reachableTiles = {};
-    angleLoop: for (let angle = 65; angle < 110; angle += 1) {
+    angleLoop: for (let angle = RIGHT_BOUND; angle < LEFT_BOUND; angle += 1) {
       for (let i = level.tiles.length - 1; i >= 0; i--) {
         for (let j = 0; j < level.columns; j++) {
           const tile = level.tiles[i][j];
@@ -554,28 +577,28 @@ window.onload = function () {
   }
 
   function doesCollide(angle, tile) {
-    let centerAngle = 0;
+    let tileCenterAngle = 0;
     if (angle < 90) {
-      centerAngle = radToDeg(
-        Math.atan2(player.centerY - tile.centerY, tile.centerX - player.centerX)
+      tileCenterAngle = radToDeg(
+        Math.atan2(player.centerY - tile.centerY, tile.centerX - player.centerX),
       );
     } else if (angle >= 90 && angle < 180) {
-      centerAngle =
+      tileCenterAngle =
         180 -
         radToDeg(
           Math.atan2(
             player.centerY - tile.centerY,
-            player.centerX - tile.centerX
-          )
+            player.centerX - tile.centerX,
+          ),
         );
     }
     const distance = Math.sqrt(
       Math.pow(player.centerX - tile.centerX, 2) +
-        Math.pow(player.centerY - tile.centerY, 2)
+      Math.pow(player.centerY - tile.centerY, 2),
     );
     const beta = radToDeg(Math.asin(level.radius / distance));
-    const rightBound = centerAngle - beta;
-    const leftBound = centerAngle + beta;
+    const rightBound = tileCenterAngle - beta;
+    const leftBound = tileCenterAngle + beta;
     if (angle >= rightBound && angle <= leftBound) {
       return true;
     } else {
@@ -676,7 +699,7 @@ window.onload = function () {
 
   function animateAim(dt) {
     player.angle -= dt * 400;
-    if (player.angle < rightBound) {
+    if (player.angle < RIGHT_BOUND) {
       gameState = gameStates.waitingForCollisionCheck;
     }
   }
@@ -685,9 +708,12 @@ window.onload = function () {
     // Get the mouse position
     let pos = getMousePos(canvas, e);
 
+    player.x = pos.x;
+    player.y = pos.y;
+
     // Get the mouse angle
     let mouseAngle = radToDeg(
-      Math.atan2(player.centerY - pos.y, pos.x - player.centerX)
+      Math.atan2(player.centerY - pos.y, pos.x - player.centerX),
     );
 
     // Convert range to 0, 360 degrees
@@ -701,10 +727,10 @@ window.onload = function () {
     //      \___/
     //       270
 
-    if (mouseAngle < 270 && mouseAngle > leftBound) {
-      mouseAngle = leftBound;
-    } else if (mouseAngle > 270 || mouseAngle < rightBound) {
-      mouseAngle = rightBound;
+    if (mouseAngle < 270 && mouseAngle > LEFT_BOUND) {
+      mouseAngle = LEFT_BOUND;
+    } else if (mouseAngle > 270 || mouseAngle < RIGHT_BOUND) {
+      mouseAngle = RIGHT_BOUND;
     }
 
     player.angle = mouseAngle;
@@ -760,7 +786,7 @@ window.onload = function () {
       centerX - TURRET_WIDTH / 2,
       centerY,
       TURRET_WIDTH,
-      TURRET_HEIGHT
+      TURRET_HEIGHT,
     );
     context.arc(centerX, centerY, 30, 0, Math.PI * 2, false);
     context.fill();
@@ -773,7 +799,7 @@ window.onload = function () {
     context.moveTo(centerX, centerY);
     context.lineTo(
       centerX + 1 * level.tileWidth * Math.cos(degToRad(player.angle)),
-      centerY - 1 * level.tileHeight * Math.sin(degToRad(player.angle))
+      centerY - 1 * level.tileHeight * Math.sin(degToRad(player.angle)),
     );
     context.stroke();
 
@@ -781,13 +807,11 @@ window.onload = function () {
     context.setLineDash([5, 15]);
     context.strokeStyle = colors.blue2;
     context.beginPath();
-    context.moveTo(
-      centerX + 1.2 * level.tileWidth * Math.cos(degToRad(player.angle)),
-      centerY - 1.2 * level.tileHeight * Math.sin(degToRad(player.angle))
+    context.moveTo(centerX, centerY,
     );
     context.lineTo(
-      centerX + 4 * level.tileWidth * Math.cos(degToRad(player.angle)),
-      centerY - 4 * level.tileHeight * Math.sin(degToRad(player.angle))
+      centerX + 20 * level.tileWidth * Math.cos(degToRad(player.angle)),
+      centerY - 20 * level.tileHeight * Math.sin(degToRad(player.angle)),
     );
     context.stroke();
   }
@@ -796,8 +820,6 @@ window.onload = function () {
     const dx = x - player.centerX;
     const dy = player.centerY - y;
     const angle = radToDeg(Math.atan2(dy, dx));
-    console.log("angle");
-    console.log(angle);
     player.angle = angle;
   }
 
@@ -833,7 +855,7 @@ window.onload = function () {
       "Press any key to restart",
       24,
       level.width / 2,
-      level.height / 2 + 30
+      level.height / 2 + 30,
     );
     context.fill();
   }
@@ -849,7 +871,7 @@ window.onload = function () {
       "Press any key to restart",
       24,
       level.width / 2,
-      level.height / 2 + 30
+      level.height / 2 + 30,
     );
     context.fill();
   }
