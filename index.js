@@ -106,7 +106,7 @@ window.onload = function() {
     tiles: [], // 2d array to hold the tiles
     reachableTiles: [], // tiles that can be reached by the turret
     availableChars: {}, // remaining chars that can be used to form words
-    tileInPath: null
+    tileInPath: null,
   };
 
   const player = {
@@ -388,19 +388,59 @@ window.onload = function() {
   }
 
   function removeFloatingTiles() {
-    for (let i = level.tiles.length - 1; i >= 0; i--) {
+    const tilesTouchingCeiling = [[]];
+
+    const tileState = {
+      unvisited: 0,
+      connectedToCeiling: 1,
+      missing: 2,
+    };
+
+    // first pass, mark tiles touching ceiling and populate the rest with "unvisited"
+    // mark top tiles
+    for (let j = 0; j < level.columns; j++) {
+      const tile = level.tiles[0][j];
+      if (tile) {
+        tilesTouchingCeiling[0].push(tileState.connectedToCeiling);
+      } else {
+        tilesTouchingCeiling[0].push(tileState.unvisited);
+      }
+    }
+    for (let i = 1; i < level.tiles.length; i++) {
+      tilesTouchingCeiling[i] = [];
       for (let j = 0; j < level.columns; j++) {
-        const tile = level.tiles[i][j];
-        if (tile) {
-          const neighbors = getNeighbors(i, j);
-          let isFloating = true;
-          for (const neighbor of neighbors) {
-            if (neighbor && !neighbor.shouldRemove) {
-              isFloating = false;
-              break;
-            }
-          }
-          if (isFloating) {
+        tilesTouchingCeiling[i].push(tileState.unvisited);
+      }
+    }
+
+    const stack = [];
+
+    for (let j = 0; j < level.columns; j++) {
+      const tile = level.tiles[0][j];
+      if (tile) {
+        stack.push(tile);
+      }
+    }
+
+    while (stack.length > 0) {
+      const tile = stack.pop();
+      const neighborTiles = getNeighbors(tile.i, tile.j);
+      for (const neighbor of neighborTiles) {
+        if (tiles[neighbor.i][neighbor.j] == null || tiles[neighbor.i][neighbor.j].shouldRemove) {
+          tilesTouchingCeiling[neighbor.i][neighbor.j] = tileState.missing;
+          continue;
+        }
+        if (tilesTouchingCeiling[neighbor.i][neighbor.j] == tileState.unvisited) {
+          tilesTouchingCeiling[neighbor.i][neighbor.j] = tileState.connectedToCeiling;
+          stack.push(neighbor);
+        }
+      }
+    }
+
+    for (let i = 1; i < level.tiles.length; i++) {
+      for (let j = 0; j < level.columns; j++) {
+        if (tilesTouchingCeiling[i][j] != tileState.connectedToCeiling) {
+          if (level.tiles[i][j]) {
             removeTile(i, j);
           }
         }
@@ -808,7 +848,7 @@ window.onload = function() {
 
     // Draw dashed line representing bullet path, stopping at first tile or wall
     context.lineWidth = 3;
-    context.strokeStyle = colors.blue1
+    context.strokeStyle = colors.blue1;
     context.beginPath();
     context.moveTo(centerX, centerY);
     // Make it stop at the first tile that it hits
@@ -827,7 +867,7 @@ window.onload = function() {
     context.lineTo(x, y);
     context.stroke();
   }
-  
+
   function getDistanceToTileEdge(xStart, yStart, xCursor, yCursor, xTile, yTile) {
     const dx = xCursor - xStart;
     const dy = yStart - yCursor;
@@ -841,9 +881,9 @@ window.onload = function() {
       Math.pow(yStart - yTile, 2),
     );
 
-    const a = level.radius
-    const b = distanceToTile
-    const angleA = theta
+    const a = level.radius;
+    const b = distanceToTile;
+    const angleA = theta;
     const [c1, c2] = solveQuadratic(
       1,
       -2 * b * Math.cos(degToRad(angleA)),
