@@ -106,6 +106,7 @@ window.onload = function() {
     tiles: [], // 2d array to hold the tiles
     reachableTiles: [], // tiles that can be reached by the turret
     availableChars: {}, // remaining chars that can be used to form words
+    tileInPath: null
   };
 
   const player = {
@@ -510,7 +511,9 @@ window.onload = function() {
             Math.PI * 2,
             false,
           );
-          if (
+          if (tile == level.tileInPath) {
+            context.fillStyle = colors.purple1;
+          } else if (
             tile.state == "target" &&
             player.word[player.word.length - 1] == tile
           ) {
@@ -803,17 +806,76 @@ window.onload = function() {
     );
     context.stroke();
 
-    // Draw dashed line representing bullet path
-    context.setLineDash([5, 15]);
-    context.strokeStyle = colors.blue2;
+    // Draw dashed line representing bullet path, stopping at first tile or wall
+    context.lineWidth = 3;
+    context.strokeStyle = colors.blue1
     context.beginPath();
-    context.moveTo(centerX, centerY,
-    );
-    context.lineTo(
-      centerX + 20 * level.tileWidth * Math.cos(degToRad(player.angle)),
-      centerY - 20 * level.tileHeight * Math.sin(degToRad(player.angle)),
-    );
+    context.moveTo(centerX, centerY);
+    // Make it stop at the first tile that it hits
+    const tileInPath = getFirstTileInPath(player.angle);
+    // calculate distance from centerX, centerY to the arc of the tileInPath
+    let distance = 0;
+    if (tileInPath) {
+      level.tileInPath = tileInPath;
+      distance = getDistanceToTileEdge(centerX, centerY, player.x, player.y, tileInPath.centerX, tileInPath.centerY);
+    } else {
+      level.tileInPath = null;
+      distance = level.width;
+    }
+    const x = centerX + distance * Math.cos(degToRad(player.angle));
+    const y = centerY - distance * Math.sin(degToRad(player.angle));
+    context.lineTo(x, y);
     context.stroke();
+  }
+  
+  function getDistanceToTileEdge(xStart, yStart, xCursor, yCursor, xTile, yTile) {
+    const dx = xCursor - xStart;
+    const dy = yStart - yCursor;
+    const angleToCursor = radToDeg(Math.atan2(dy, dx));
+    const dxTile = xTile - xStart;
+    const dyTile = yStart - yTile;
+    const angleToTile = radToDeg(Math.atan2(dyTile, dxTile));
+    const theta = Math.abs(angleToCursor - angleToTile);
+    const distanceToTile = Math.sqrt(
+      Math.pow(xTile - xStart, 2) +
+      Math.pow(yStart - yTile, 2),
+    );
+
+    const a = level.radius
+    const b = distanceToTile
+    const angleA = theta
+    const [c1, c2] = solveQuadratic(
+      1,
+      -2 * b * Math.cos(degToRad(angleA)),
+      b * b - a * a,
+    );
+    const distanceToEdge = Math.min(c1, c2);
+    return distanceToEdge;
+  }
+
+  function solveQuadratic(a, b, c) {
+    const discriminant = b * b - 4 * a * c;
+    if (discriminant < 0) {
+      return [];
+    } else if (discriminant === 0) {
+      return [-b / (2 * a)];
+    } else {
+      const root1 = (-b + Math.sqrt(discriminant)) / (2 * a);
+      const root2 = (-b - Math.sqrt(discriminant)) / (2 * a);
+      return [root1, root2];
+    }
+  }
+
+
+  function getFirstTileInPath(angle) {
+    for (let i = level.tiles.length - 1; i >= 0; i--) {
+      for (let j = 0; j < level.columns; j++) {
+        const tile = level.tiles[i][j];
+        if (tile && doesCollide(angle, tile)) {
+          return tile;
+        }
+      }
+    }
   }
 
   function aimTurret(x, y) {
