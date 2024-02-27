@@ -128,6 +128,8 @@ window.onload = function() {
       this.shift = 0; // Shift the tile when removing
       this.velocity = 0; // Velocity when removing
       this.state = "idle";
+      this.leftAngleBound = null; // calculated when we find reachable tiles
+      this.rightAngleBound = null; // calculated when we find reachable tiles
     }
 
     get x() {
@@ -154,7 +156,9 @@ window.onload = function() {
       this.state = "target";
       level.availableChars[this.val] -= 1;
       const { centerX, centerY } = getTileCoordinate(this.i, this.j);
-      aimTurret(centerX, centerY);
+      const tileLeftAngleBound = this.leftAngleBound;
+      const tileRightAngleBound = this.rightAngleBound;
+      aimTurretToAngle((tileLeftAngleBound + tileRightAngleBound) / 2);
     }
 
     untarget() {
@@ -166,11 +170,8 @@ window.onload = function() {
 
       // aim at last tile in word
       if (player.word.length > 0) {
-        const { x, y } = getTileCoordinate(
-          player.word[player.word.length - 1].i,
-          player.word[player.word.length - 1].j,
-        );
-        aimTurret(x, y);
+        const lastTile = player.word[player.word.length - 1];
+        aimTurretToAngle((lastTile.leftAngleBound + lastTile.rightAngleBound) / 2);
       }
     }
 
@@ -459,6 +460,8 @@ window.onload = function() {
         const tile = level.tiles[i][j];
         if (tile && tile.state == "remove") {
           level.tiles[i][j] = null;
+          level.tiles[i][j].leftAngleBound = null;
+          level.tiles[i][j].rightAngleBound = null;
         }
       }
     }
@@ -592,12 +595,20 @@ window.onload = function() {
 
   function findReachableTiles() {
     const reachableTiles = {};
-    angleLoop: for (let angle = RIGHT_BOUND; angle < LEFT_BOUND; angle += 0.25) {
+    angleLoop: for (let angle = LEFT_BOUND; angle >= RIGHT_BOUND; angle -= 0.25) {
       const tile = getFirstTileInPath(angle)
 
       if (tile) {
-        console.log(angle, tile)
         reachableTiles[`${tile.i},${tile.j}`] = tile;
+        if (tile.leftAngleBound == null) {
+          // Note that we iterate from left to right, so left is the first time we see it
+          tile.leftAngleBound = angle;
+        }
+        if (tile.rightAngleBound == null) {
+          tile.rightAngleBound = angle;
+        }
+        // Note that left is 180 is and right is 0, so we want to take the min to find the right bound
+        tile.rightAngleBound = Math.min(angle, tile.rightAngleBound)
       }
     }
     level.reachableTiles = Object.values(reachableTiles);
@@ -854,7 +865,7 @@ window.onload = function() {
     let distance = 0;
     if (tileInPath) {
       level.tileInPath = tileInPath;
-      distance = getDistanceToTileEdge(centerX, centerY, player.x, player.y, tileInPath.centerX, tileInPath.centerY);
+      distance = getDistanceToTileEdge(centerX, centerY, player.angle, tileInPath.centerX, tileInPath.centerY);
     } else {
       level.tileInPath = null;
       distance = level.width;
@@ -865,14 +876,11 @@ window.onload = function() {
     context.stroke();
   }
 
-  function getDistanceToTileEdge(xStart, yStart, xCursor, yCursor, xTile, yTile) {
-    const dx = xCursor - xStart;
-    const dy = yStart - yCursor;
-    const angleToCursor = radToDeg(Math.atan2(dy, dx));
+  function getDistanceToTileEdge(xStart, yStart, playerAngle, xTile, yTile) {
     const dxTile = xTile - xStart;
     const dyTile = yStart - yTile;
     const angleToTile = radToDeg(Math.atan2(dyTile, dxTile));
-    const theta = Math.abs(angleToCursor - angleToTile);
+    const theta = Math.abs(playerAngle - angleToTile);
     const distanceToTile = Math.sqrt(
       Math.pow(xTile - xStart, 2) +
       Math.pow(yStart - yTile, 2),
@@ -913,6 +921,10 @@ window.onload = function() {
         }
       }
     }
+  }
+
+  function aimTurretToAngle(angle) {
+    player.angle = angle;
   }
 
   function aimTurret(x, y) {
