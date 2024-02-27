@@ -592,15 +592,12 @@ window.onload = function() {
 
   function findReachableTiles() {
     const reachableTiles = {};
-    angleLoop: for (let angle = RIGHT_BOUND; angle < LEFT_BOUND; angle += 1) {
-      for (let i = level.tiles.length - 1; i >= 0; i--) {
-        for (let j = 0; j < level.columns; j++) {
-          const tile = level.tiles[i][j];
-          if (tile && doesCollide(angle, tile)) {
-            reachableTiles[`${i},${j}`] = tile;
-            continue angleLoop;
-          }
-        }
+    angleLoop: for (let angle = RIGHT_BOUND; angle < LEFT_BOUND; angle += 0.25) {
+      const tile = getFirstTileInPath(angle)
+
+      if (tile) {
+        console.log(angle, tile)
+        reachableTiles[`${tile.i},${tile.j}`] = tile;
       }
     }
     level.reachableTiles = Object.values(reachableTiles);
