@@ -830,31 +830,8 @@ window.onload = function() {
     const centerX = level.x + level.width / 2;
     const centerY = level.height - TURRET_HEIGHT - FLOOR_HEIGHT;
 
-    // Draw turret
-    context.fillStyle = "#000";
-    context.beginPath();
-    context.fillRect(
-      centerX - TURRET_WIDTH / 2,
-      centerY,
-      TURRET_WIDTH,
-      TURRET_HEIGHT,
-    );
-    context.arc(centerX, centerY, 30, 0, Math.PI * 2, false);
-    context.fill();
 
-    // Draw cannon
-    context.lineWidth = 2;
-    context.strokeStyle = "#000";
-    context.setLineDash([0, 0]);
-    context.beginPath();
-    context.moveTo(centerX, centerY);
-    context.lineTo(
-      centerX + 1 * level.tileWidth * Math.cos(degToRad(player.angle)),
-      centerY - 1 * level.tileHeight * Math.sin(degToRad(player.angle)),
-    );
-    context.stroke();
-
-    // Draw dashed line representing bullet path, stopping at first tile or wall
+    // Draw line representing bullet path, stopping at first tile or wall
     context.lineWidth = 3;
     context.strokeStyle = colors.blue1;
     context.beginPath();
@@ -873,6 +850,30 @@ window.onload = function() {
     const x = centerX + distance * Math.cos(degToRad(player.angle));
     const y = centerY - distance * Math.sin(degToRad(player.angle));
     context.lineTo(x, y);
+    context.stroke();
+
+    // Draw turret
+    context.fillStyle = "#000";
+    context.beginPath();
+    context.fillRect(
+      centerX - TURRET_WIDTH / 2,
+      centerY,
+      TURRET_WIDTH,
+      TURRET_HEIGHT,
+    );
+    context.arc(centerX, centerY, 30, 0, Math.PI * 2, false);
+    context.fill();
+
+    // Draw cannon
+    context.lineWidth = 13;
+    context.strokeStyle = "#000";
+    context.setLineDash([0, 0]);
+    context.beginPath();
+    context.moveTo(centerX, centerY);
+    context.lineTo(
+      centerX + 0.8 * level.tileWidth * Math.cos(degToRad(player.angle)),
+      centerY - 0.8 * level.tileHeight * Math.sin(degToRad(player.angle)),
+    );
     context.stroke();
   }
 
