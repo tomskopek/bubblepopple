@@ -43,13 +43,14 @@ canvas {
 .keyboard-row {
   display: flex;
   width: 100%;
-  /*margin: 0 auto 8px;*/
+  margin: 0 auto 8px;
   touch-action: manipulation;
   justify-content: center;
 }
 
 .keyboard-button {
   height: 58px;
+  max-width: 44px;
   margin: 0 6px 0 0;
   border: 1px solid #000;
   border-radius: 5px;
@@ -67,20 +68,16 @@ canvas {
 }
 
 .keyboard-enter {
-  width: 80px;
+  max-width: 80px;
 }
 .keyboard-del {
-  width: 80px;
+  max-width: 80px;
 }
 
 /* smaller screens */
 @media screen and (max-width: 768px) {
   .keyboard {
     background-color: cyan;
-  }
-
-  .keyboard-row {
-    margin: 3px 0;
   }
 
   .keyboard-enter {
