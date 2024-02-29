@@ -51,6 +51,7 @@ canvas {
 .keyboard-button {
   height: 58px;
   max-width: 44px;
+  width: 44px; /* overwritten with js */
   margin: 0 6px 0 0;
   border: 1px solid #000;
   border-radius: 5px;
@@ -60,7 +61,7 @@ canvas {
   align-items: center;
   font-size: 1.2em;
   box-sizing: border-box;
-  color: cyan;
+  color: green;
   cursor: pointer;
   transition: background-color 0.3s;
 }
