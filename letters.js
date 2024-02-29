@@ -1,5 +1,7 @@
 // Credit: Scrabble distribution of 100 tiles
 
+import { randomInt } from "./utils.js";
+
 const letterDistribution = {
   A: 9,
   B: 2,
@@ -41,8 +43,6 @@ const letterDistributionArr = (function () {
 
 export function getRandomLetter() {
   const letter =
-    letterDistributionArr[
-      Math.floor(Math.random() * letterDistributionArr.length)
-    ];
+    letterDistributionArr[randomInt(0, letterDistributionArr.length - 1)];
   return letter;
 }
