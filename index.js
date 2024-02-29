@@ -52,20 +52,22 @@ function setKeyboardKeyWidth(width) {
   enterButton.style.width = `${width * 1.5}px`;
 }
 
-window.onresize = function() {
+const canvas = document.getElementById("canvas");
+const context = canvas.getContext("2d");
+
+function setGameDimensions() {
   const keyboardKeyWidth = calculateKeyboardKeyWidth();
   setKeyboardKeyWidth(keyboardKeyWidth);
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight * 0.6;
+}
+
+window.onresize = function() {
+  setGameDimensions()
 }
 
 window.onload = function() {
-  const keyboardKeyWidth = calculateKeyboardKeyWidth();
-  setKeyboardKeyWidth(keyboardKeyWidth);
-
-  const canvas = document.getElementById("canvas");
-  const context = canvas.getContext("2d");
-
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight * 0.6;
+  setGameDimensions()
 
   let lastFrame = 0;
 
@@ -118,6 +120,13 @@ window.onload = function() {
       [-1, -1], // northwest
     ],
   ]; // even row tiles
+
+  const debug = {
+    windowInnerWidth: window.innerWidth,
+    canvasWidth: canvas.width,
+    canvasHeight: canvas.height,
+    keyboardRowWidth: document.querySelector('.keyboard-row').offsetWidth,
+  }
 
   const level = {
     x: canvas.width / 2 - LEVEL_WIDTH / 2, // x posn
@@ -368,7 +377,7 @@ window.onload = function() {
     renderWord();
     renderKeyboard();
     if (SHOW_FPS) renderFps(context, level);
-    if (SHOW_DEBUG_INFO) renderDebugInfo(context, level, player);
+    if (SHOW_DEBUG_INFO) renderDebugInfo(context, level, player, debug);
   }
 
   function getTileCoordinate(row, col) {
