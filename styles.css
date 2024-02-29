@@ -59,9 +59,8 @@ canvas {
   display: flex;
   justify-content: center;
   align-items: center;
-  font-size: 2vw;
+  font-size: 20px;
   box-sizing: border-box;
-  color: red;
   cursor: pointer;
   transition: background-color 0.3s;
 }
@@ -81,6 +80,11 @@ canvas {
 @media screen and (max-width: 768px) {
   /*.keyboard {*/
   /*}*/
+
+  .keyboard-button {
+    font-size: 5vw;
+    color: mediumslateblue;
+  }
 
   /*.keyboard-enter {*/
   /*  width: calc(100% / 5 - 4px);*/
