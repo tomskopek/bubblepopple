@@ -58,8 +58,9 @@ canvas {
   display: flex;
   justify-content: center;
   align-items: center;
-  /*font-size: 1.2em;*/
-  color: purple;
+  font-size: 1.2em;
+  box-sizing: border-box;
+  color: cyan;
   cursor: pointer;
   transition: background-color 0.3s;
 }
@@ -77,15 +78,14 @@ canvas {
 
 /* smaller screens */
 @media screen and (max-width: 768px) {
-  .keyboard {
-    background-color: beige;
-  }
+  /*.keyboard {*/
+  /*}*/
 
-  .keyboard-enter {
-    width: calc(100% / 5 - 4px);
-  }
+  /*.keyboard-enter {*/
+  /*  width: calc(100% / 5 - 4px);*/
+  /*}*/
 
-  .keyboard-del {
-    width: calc(100% / 5 - 4px);
-  }
+  /*.keyboard-del {*/
+  /*  width: calc(100% / 5 - 4px);*/
+  /*}*/
 }
