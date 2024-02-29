@@ -32,7 +32,35 @@ colors.unavailableTile = colors.beige1;
 colors.reachableTile = colors.brown1;
 colors.reachableUnavailableKeyboard = colors.beige6;
 
+function calculateKeyboardKeyWidth() {
+  const keyboardRowWidth = document.querySelector('.keyboard-row').offsetWidth;
+  const maxKeysInRow = 10;
+  const margin = 6
+  return (keyboardRowWidth - 8 * 2 - margin * (maxKeysInRow - 1)) / maxKeysInRow;
+}
+
+function setKeyboardKeyWidth(width) {
+  const keys = document.querySelectorAll('.keyboard-button');
+  keys.forEach(key => {
+    key.style.width = `${width}px`;
+  });
+  const deleteButton = document.getElementById('backspace');
+  // del and enter button can take up 1 extra key between the two of them
+
+  deleteButton.style.width = `${width * 1.5}px`;
+  const enterButton = document.getElementById('enter');
+  enterButton.style.width = `${width * 1.5}px`;
+}
+
+window.onresize = function() {
+  const keyboardKeyWidth = calculateKeyboardKeyWidth();
+  setKeyboardKeyWidth(keyboardKeyWidth);
+}
+
 window.onload = function() {
+  const keyboardKeyWidth = calculateKeyboardKeyWidth();
+  setKeyboardKeyWidth(keyboardKeyWidth);
+
   const canvas = document.getElementById("canvas");
   const context = canvas.getContext("2d");
 
@@ -188,6 +216,7 @@ window.onload = function() {
     }
   }
 
+
   function resetLevel() {
     rowOffset = 0;
     level.tiles = [];
@@ -222,11 +251,11 @@ window.onload = function() {
   }
 
   function initKeyboard() {
-    document
-      .getElementById("dumpButton")
-      .addEventListener("click", function() {
-        addRow();
-      });
+    // document
+    //   .getElementById("dumpButton")
+    //   .addEventListener("click", function() {
+    //     addRow();
+    //   });
 
     document.getElementById("backspace").addEventListener("click", function() {
       deleteLastLetter();

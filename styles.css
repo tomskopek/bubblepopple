@@ -1,9 +1,15 @@
+:root {
+  --keyboard-height: 200px
+}
+
+main {
+  height: 100%
+}
+
 .game {
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  margin-top: 20px;
+  height: 100%
 }
 
 body,
@@ -22,37 +28,29 @@ canvas {
 }
 
 .canvas-container {
-  height: 60%;
-}
-
-.html-content {
-  height: 40%;
-  overflow-y: auto; /* Add scrollbars if content exceeds container height */
+  flex-grow: 1
 }
 
 .keyboard {
-  height: 40%;
+  height: var(--keyboard-height);
   width: 100%;
-  overflow-y: auto; /* Add scrollbars if content exceeds container height */
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  margin: 20px 0;
+  /*margin: 0 8px;*/
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
 }
 
 .keyboard-row {
   display: flex;
-  justify-content: center;
-  align-items: center;
-  margin: 10px 0;
   width: 100%;
+  /*margin: 0 auto 8px;*/
+  touch-action: manipulation;
+  justify-content: center;
 }
 
 .keyboard-button {
-  width: 50px;
-  height: 50px;
-  margin: 5px;
+  height: 58px;
+  margin: 0 6px 0 0;
   border: 1px solid #000;
   border-radius: 5px;
   background-color: #fff;
@@ -62,6 +60,10 @@ canvas {
   font-size: 20px;
   cursor: pointer;
   transition: background-color 0.3s;
+}
+
+.keyboard-button:last-child {
+  margin-right: 0;
 }
 
 .keyboard-enter {
@@ -74,16 +76,11 @@ canvas {
 /* smaller screens */
 @media screen and (max-width: 768px) {
   .keyboard {
-    background-color: aqua;
-  }
-  .keyboard-row {
-    margin: 3px 0;
+    background-color: cyan;
   }
 
-  .keyboard-button {
-    width: calc(100% / 14 - 4px);
-    /* height: calc(100% / 7 - 4px); */
-    margin: 2px;
+  .keyboard-row {
+    margin: 3px 0;
   }
 
   .keyboard-enter {
