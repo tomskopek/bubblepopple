@@ -58,7 +58,8 @@ canvas {
   display: flex;
   justify-content: center;
   align-items: center;
-  font-size: 20px;
+  font-size: 1.2em;
+  font-color: purple;
   cursor: pointer;
   transition: background-color 0.3s;
 }
