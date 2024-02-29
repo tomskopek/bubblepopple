@@ -77,7 +77,7 @@ canvas {
 /* smaller screens */
 @media screen and (max-width: 768px) {
   .keyboard {
-    background-color: cyan;
+    background-color: beige;
   }
 
   .keyboard-enter {
