@@ -352,17 +352,15 @@ window.onload = function() {
   }
 
   function renderKeyboard() {
-    const allTiles = "abcdefghijklmnopqrstuvwxyz".split("");
-    for (const char of allTiles) {
-      const tile = findTileByChar(char);
-      if (tile && level.availableChars[char.toUpperCase()] > 0) {
-        document.getElementById(char).style.backgroundColor = colors.reachableTile;
-      } else if (tile && level.reachableTiles.includes(tile)) {
-        document.getElementById(char).style.backgroundColor = colors.reachableUnavailableKeyboard;
-      } else {
-        document.getElementById(char).style.backgroundColor =
-          colors.unavailableTile;
-      }
+    document.querySelectorAll(".keyboard-button").forEach((key) => {
+      key.style.backgroundColor = colors.unavailableTile;
+    })
+    for (const tile of level.reachableTiles) {
+        if (level.availableChars[tile.val.toUpperCase()] > 0) {
+          document.getElementById(tile.val.toLowerCase()).style.backgroundColor = colors.reachableTile;
+        } else {
+          document.getElementById(tile.val.toLowerCase()).style.backgroundColor = colors.reachableUnavailableKeyboard;
+        }
     }
   }
 
