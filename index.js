@@ -33,22 +33,22 @@ colors.reachableTile = colors.brown1;
 colors.reachableUnavailableKeyboard = colors.beige6;
 
 function calculateKeyboardKeyWidth() {
-  const keyboardRowWidth = document.querySelector('.keyboard-row').offsetWidth;
+  const keyboardRowWidth = document.querySelector(".keyboard-row").offsetWidth;
   const maxKeysInRow = 10;
-  const margin = 6
-  return (keyboardRowWidth - 8 * 2 - margin * (maxKeysInRow - 1)) / maxKeysInRow;
+  const margin = 6;
+  return (keyboardRowWidth - (8 * 2) - margin * (maxKeysInRow - 1)) / maxKeysInRow;
 }
 
 function setKeyboardKeyWidth(width) {
-  const keys = document.querySelectorAll('.keyboard-button');
+  const keys = document.querySelectorAll(".keyboard-button");
   keys.forEach(key => {
     key.style.width = `${width}px`;
   });
-  const deleteButton = document.getElementById('backspace');
+  const deleteButton = document.getElementById("backspace");
   // del and enter button can take up 1 extra key between the two of them
 
   deleteButton.style.width = `${width * 1.5}px`;
-  const enterButton = document.getElementById('enter');
+  const enterButton = document.getElementById("enter");
   enterButton.style.width = `${width * 1.5}px`;
 }
 
@@ -58,17 +58,17 @@ const context = canvas.getContext("2d");
 function setGameDimensions() {
   const keyboardKeyWidth = calculateKeyboardKeyWidth();
   setKeyboardKeyWidth(keyboardKeyWidth);
-  const canvasContainer = document.querySelector('.canvas-container');
+  const canvasContainer = document.querySelector(".canvas-container");
   canvas.width = canvasContainer.offsetWidth;
   canvas.height = canvasContainer.offsetHeight;
 }
 
 window.onresize = function() {
-  setGameDimensions()
-}
+  setGameDimensions();
+};
 
 window.onload = function() {
-  setGameDimensions()
+  setGameDimensions();
 
   let lastFrame = 0;
 
@@ -126,9 +126,9 @@ window.onload = function() {
     windowInnerWidth: window.innerWidth,
     canvasWidth: canvas.width,
     canvasHeight: canvas.height,
-    keyboardRowWidth: document.querySelector('.keyboard-row').offsetWidth,
+    keyboardRowWidth: document.querySelector(".keyboard-row").offsetWidth,
     keyboardKeyWidth: calculateKeyboardKeyWidth(),
-  }
+  };
 
   const level = {
     x: canvas.width / 2 - LEVEL_WIDTH / 2, // x posn
@@ -279,11 +279,12 @@ window.onload = function() {
     "abcdefghijklmnopqrstuvwxyz".split("").forEach((char) => {
       // add click listener to each letter
       document.getElementById(char).addEventListener("click", function() {
-        const tile = findTileByChar(char);
-        if (tile) {
+        const tiles = findTileByChar(char);
+        for (const tile of tiles) {
           if (tile.isAvailable()) {
             tile.target();
             player.word.push(tile);
+            break;
           }
         }
       });
@@ -291,14 +292,16 @@ window.onload = function() {
   }
 
   function findTileByChar(char) {
+    tiles = [];
     for (let i = level.tiles.length - 1; i >= 0; i--) {
       for (let j = 0; j < level.columns; j++) {
         const tile = level.tiles[i][j];
         if (tile && tile.val.toLowerCase() === char) {
-          return tile;
+          tiles.push(tile);
         }
       }
     }
+    return tiles;
   }
 
   // Main game loop
@@ -594,9 +597,10 @@ window.onload = function() {
             Math.PI * 2,
             false,
           );
-          if (tile == level.tileInPath) {
-            context.fillStyle = colors.purple1;
-          } else if (
+          // if (tile == level.tileInPath) {
+          //   // context.fillStyle = colors.purple1;
+          // } else
+          if (
             tile.state == "target" &&
             player.word[player.word.length - 1] == tile
           ) {
@@ -636,7 +640,7 @@ window.onload = function() {
   function findReachableTiles() {
     const reachableTiles = {};
     angleLoop: for (let angle = LEFT_BOUND; angle >= RIGHT_BOUND; angle -= 0.25) {
-      const tile = getFirstTileInPath(angle)
+      const tile = getFirstTileInPath(angle);
 
       if (tile) {
         reachableTiles[`${tile.i},${tile.j}`] = tile;
@@ -648,7 +652,7 @@ window.onload = function() {
           tile.rightAngleBound = angle;
         }
         // Note that left is 180 is and right is 0, so we want to take the min to find the right bound
-        tile.rightAngleBound = Math.min(angle, tile.rightAngleBound)
+        tile.rightAngleBound = Math.min(angle, tile.rightAngleBound);
       }
     }
     level.reachableTiles = Object.values(reachableTiles);
@@ -785,13 +789,6 @@ window.onload = function() {
           break;
         }
       }
-    }
-  }
-
-  function animateAim(dt) {
-    player.angle -= dt * 400;
-    if (player.angle < RIGHT_BOUND) {
-      gameState = gameStates.waitingForCollisionCheck;
     }
   }
 
