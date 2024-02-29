@@ -470,7 +470,7 @@ window.onload = function() {
       const tile = stack.pop();
       const neighborTiles = getNeighbors(tile.i, tile.j);
       for (const neighbor of neighborTiles) {
-        if (tiles[neighbor.i][neighbor.j] == null || tiles[neighbor.i][neighbor.j].shouldRemove) {
+        if (level.tiles[neighbor.i][neighbor.j] == null || level.tiles[neighbor.i][neighbor.j].shouldRemove) {
           tilesTouchingCeiling[neighbor.i][neighbor.j] = tileState.missing;
           continue;
         }
