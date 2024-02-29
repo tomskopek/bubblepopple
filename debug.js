@@ -1,5 +1,5 @@
 export function renderDebugInfo(context, level, player, debug) {
-  const numDebugInfo = 7
+  const numDebugInfo = 8
   const rowHeight = 16
   const width = 320;
   const height = rowHeight * numDebugInfo + 10;
@@ -24,4 +24,6 @@ export function renderDebugInfo(context, level, player, debug) {
   context.fillText(`canvasHeight: ${debug.canvasHeight}`, x, y);
   y += rowHeight
   context.fillText(`keyboardRowWidth: ${debug.keyboardRowWidth}`, x, y);
+  y += rowHeight
+  context.fillText(`keyboardKeyWidth: ${debug.keyboardKeyWidth}`, x, y);
 }

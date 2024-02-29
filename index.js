@@ -58,8 +58,9 @@ const context = canvas.getContext("2d");
 function setGameDimensions() {
   const keyboardKeyWidth = calculateKeyboardKeyWidth();
   setKeyboardKeyWidth(keyboardKeyWidth);
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight * 0.6;
+  const canvasContainer = document.querySelector('.canvas-container');
+  canvas.width = canvasContainer.offsetWidth;
+  canvas.height = canvasContainer.offsetHeight;
 }
 
 window.onresize = function() {
@@ -126,6 +127,7 @@ window.onload = function() {
     canvasWidth: canvas.width,
     canvasHeight: canvas.height,
     keyboardRowWidth: document.querySelector('.keyboard-row').offsetWidth,
+    keyboardKeyWidth: calculateKeyboardKeyWidth(),
   }
 
   const level = {
