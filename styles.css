@@ -82,10 +82,10 @@ canvas {
   /*.keyboard {*/
   /*}*/
 
-  .keyboard-button {
-    font-size: 5vw;
-    color: aqua;
-  }
+  /*.keyboard-button {*/
+  /*  font-size: 5vw;*/
+  /*  color: aqua;*/
+  /*}*/
 
   /*.keyboard-enter {*/
   /*  width: calc(100% / 5 - 4px);*/
