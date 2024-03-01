@@ -59,7 +59,8 @@ canvas {
   display: flex;
   justify-content: center;
   align-items: center;
-  font-size: 5vw;
+  /*font-size: 5vw;*/
+  color: greenyellow;
   /*font-size: 20px;*/
   box-sizing: border-box;
   cursor: pointer;
