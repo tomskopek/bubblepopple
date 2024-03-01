@@ -67,7 +67,7 @@ canvas {
 p {
   margin: 0;
   font-size: 20px;
-  color: brown;
+  color: #000;
 }
 
 .keyboard-button:last-child {
