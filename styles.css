@@ -59,7 +59,7 @@ canvas {
   display: flex;
   justify-content: center;
   align-items: center;
-  font-size: 20px;
+  /*font-size: 20px;*/
   box-sizing: border-box;
   cursor: pointer;
   transition: background-color 0.3s;
@@ -83,7 +83,7 @@ canvas {
 
   .keyboard-button {
     font-size: 5vw;
-    color: mediumslateblue;
+    color: greenyellow;
   }
 
   /*.keyboard-enter {*/
