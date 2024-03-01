@@ -5,6 +5,7 @@ import { renderDebugInfo } from "./debug.js";
 import { buildDict, findSuccinctWord } from "./dictionary/dictionary.js";
 
 const colors = {
+  white: "#fff",
   beige1: "#eee1c4",
   beige2: "#e6d9bd",
   beige3: "#dbcfb1",
@@ -28,7 +29,7 @@ const colors = {
   green1: "#87a985",
   green2: "#6f8b6e",
 };
-colors.unavailableTile = colors.beige1;
+colors.unavailableTile = colors.white;
 colors.reachableTile = colors.brown1;
 colors.reachableUnavailableKeyboard = colors.beige6;
 
