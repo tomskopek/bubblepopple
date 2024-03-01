@@ -88,7 +88,7 @@ window.onload = function() {
 
   // Options
   const SHOW_FPS = false;
-  const SHOW_DEBUG_INFO = true;
+  const SHOW_DEBUG_INFO = false;
 
   const NUM_COLUMNS = 7;
   const TILE_SIZE = Math.min(50, canvas.width / (NUM_COLUMNS + 0.5));
