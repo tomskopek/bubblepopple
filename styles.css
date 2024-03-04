@@ -34,7 +34,7 @@ canvas {
 .keyboard {
   height: var(--keyboard-height);
   width: 100%;
-  /*margin: 0 8px;*/
+  margin-top: 8px;
   user-select: none;
   -webkit-user-select: none;
   -moz-user-select: none;

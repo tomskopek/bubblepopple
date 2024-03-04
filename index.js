@@ -444,7 +444,11 @@ window.onload = function() {
     for (let j = 0; j < level.columns; j++) {
       const tile = level.tiles[0][j];
       if (tile) {
-        tilesTouchingCeiling[0].push(tileState.connectedToCeiling);
+        if (tile.shouldRemove) {
+          tilesTouchingCeiling[0].push(tileState.missing);
+        } else {
+          tilesTouchingCeiling[0].push(tileState.connectedToCeiling);
+        }
       } else {
         tilesTouchingCeiling[0].push(tileState.unvisited);
       }
@@ -460,7 +464,7 @@ window.onload = function() {
 
     for (let j = 0; j < level.columns; j++) {
       const tile = level.tiles[0][j];
-      if (tile) {
+      if (tile && tilesTouchingCeiling[0][j] == tileState.connectedToCeiling) {
         stack.push(tile);
       }
     }
