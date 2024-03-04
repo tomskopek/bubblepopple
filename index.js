@@ -738,10 +738,10 @@ window.onload = function() {
   }
 
   function resetWord() {
-    for (const tile of player.word) {
-      tile.state = "idle";
+    for (let i = player.word.length - 1; i >= 0; i--) {
+      const tile = player.word[i];
+      tile.untarget();
     }
-    player.word = [];
   }
 
   function submitWord() {
