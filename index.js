@@ -102,7 +102,7 @@ window.onload = function() {
 
   // Options
   const SHOW_FPS = false;
-  const SHOW_DEBUG_INFO = true;
+  const SHOW_DEBUG_INFO = false;
 
   const FONT_SIZE = 24;
   const DROP_SPEED = 1000;
