@@ -891,8 +891,8 @@ window.onload = function() {
           if (
             x > tileX &&
             x < tileX + tileSize &&
-            y > tileY &&
-            y < tileY + tileSize
+            y > tileY + tile.shift &&
+            y < tileY + tile.shift + tileSize
           ) {
             return tile;
             break;
@@ -919,7 +919,7 @@ window.onload = function() {
     let distance = 0;
     if (tileInPath) {
       level.tileInPath = tileInPath;
-      distance = getDistanceToTileEdge(centerX, centerY, player.angle, tileInPath.centerX, tileInPath.centerY);
+      distance = getDistanceToTileEdge(centerX, centerY, player.angle, tileInPath.centerX, tileInPath.centerY + tileInPath.shift);
     } else {
       level.tileInPath = null;
       distance = levelWidth;
