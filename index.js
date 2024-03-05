@@ -396,6 +396,7 @@ window.onload = function() {
       return;
     }
     renderFrame();
+    renderFreezeTime();
     renderTiles();
     renderPlayer();
     renderWord();
@@ -619,6 +620,16 @@ window.onload = function() {
     );
   }
 
+  function renderFreezeTime() {
+    if (freezeTimeMs > 0) {
+      context.fillStyle = colors.gray1;
+      // draw a "pause" symbol in the background with two rectangles
+      context.fillRect(level.x + levelWidth / 2 - 10, level.y + levelHeight / 2 - 10, 10, 40);
+      context.fillRect(level.x + levelWidth / 2 + 10, level.y + levelHeight / 2 - 10, 10, 40);
+
+    }
+  }
+
   function renderTiles() {
     // Top to bottom
     for (let i = 0; i < level.tiles.length; i++) {
@@ -794,7 +805,8 @@ window.onload = function() {
         player.score += 4;
         freezeTimeMs += 1500;
       } else if (word.length >= 5) {
-        player.score += 8;
+        const score = Math.pow(2, word.length - 3);
+        player.score += score
         freezeTimeMs += 3000;
         // TODO: give player a bomb to use?
       }
