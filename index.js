@@ -87,12 +87,9 @@ window.onload = function() {
 
   const gameStates = {
     idle: 0,
-    animateCollisionCheck: 1.0,
-    waitingForCollisionCheck: 1.1,
     falling: 2,
     removing: 3,
     lose: 4,
-    win: 5,
   };
   let gameState = gameStates.idle;
 
@@ -309,7 +306,7 @@ window.onload = function() {
 
   // Main game loop
   function main(tframe) {
-    if (gameState == gameStates.lose || gameState == gameStates.win) {
+    if (gameState == gameStates.lose) {
       render();
       return;
     }
@@ -322,8 +319,7 @@ window.onload = function() {
   }
 
   function newRound() {
-    // player.angle = LEFT_BOUND - 1;
-    gameState = gameStates.animateCollisionCheck;
+    gameState = gameStates.idle;
   }
 
   function update(tframe) {
@@ -337,22 +333,13 @@ window.onload = function() {
       moveTilesDown(dt)
       findReachableTiles();
       findAvailableChars();
-      checkWin();
-      checkLose();
+      checkGameOver();
       clearEmptyRow();
       // Ready for player input
-    } else if (gameState == gameStates.animateCollisionCheck) {
-      // animateAim(dt); // TODO: Refine this and bring it back. at the moment it's just worse than nothing
-      gameState = gameStates.waitingForCollisionCheck;
-    } else if (gameState == gameStates.waitingForCollisionCheck) {
-      player.angle = 90;
-      gameState = gameStates.idle;
     } else if (gameState == gameStates.removing) {
       stateRemoveTiles(dt);
     } else if (gameState == gameStates.lose) {
-      renderLoseScreen();
-    } else if (gameState == gameStates.win) {
-      renderWinScreen();
+      renderGameOverScreen();
     }
   }
 
@@ -391,11 +378,7 @@ window.onload = function() {
   // Render the game
   function render() {
     if (gameState == gameStates.lose) {
-      renderLoseScreen();
-      return;
-    }
-    if (gameState == gameStates.win) {
-      renderWinScreen();
+      renderGameOverScreen();
       return;
     }
     renderFrame();
@@ -758,7 +741,7 @@ window.onload = function() {
     }
   }
 
-  function checkLose() {
+  function checkGameOver() {
     const lastRowIdx = level.tiles.length - 1;
     for (let j = 0; j < NUM_COLUMNS; j++) {
       if (level.tiles[lastRowIdx][j]) {
@@ -768,17 +751,6 @@ window.onload = function() {
         }
       }
     }
-  }
-
-  function checkWin() {
-    for (let i = level.tiles.length - 1; i >= 0; i--) {
-      for (let j = 0; j < NUM_COLUMNS; j++) {
-        if (level.tiles[i][j]) {
-          return false;
-        }
-      }
-    }
-    gameState = gameStates.win;
   }
 
   function resetWord() {
@@ -823,7 +795,7 @@ window.onload = function() {
   }
 
   function onKeyDown(e) {
-    if (gameState == gameStates.lose || gameState == gameStates.win) {
+    if (gameState == gameStates.lose) {
       resetLevel();
       return;
     }
@@ -1055,7 +1027,7 @@ window.onload = function() {
     drawCenterText(`Score: ${player.score}`, 24, levelWidth / 2, levelHeight - 24);
   }
 
-  function renderLoseScreen() {
+  function renderGameOverScreen() {
     context.fillStyle = colors.beige1;
     context.fillRect(level.x, level.y, levelWidth, levelHeight);
     context.fillStyle = "black";
@@ -1069,22 +1041,6 @@ window.onload = function() {
       24,
       levelWidth / 2,
       levelHeight / 2 + 80,
-    );
-    context.fill();
-  }
-
-  function renderWinScreen() {
-    context.fillStyle = colors.beige1;
-    context.fillRect(level.x, level.y, levelWidth, levelHeight);
-    context.fillStyle = "black";
-    context.font = "24px Times";
-    drawCenterText("You win!", 24, levelWidth / 2, levelHeight / 2);
-    context.font = "20px Times";
-    drawCenterText(
-      "Press any key to restart",
-      24,
-      levelWidth / 2,
-      levelHeight / 2 + 30,
     );
     context.fill();
   }
