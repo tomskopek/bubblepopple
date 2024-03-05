@@ -1,101 +1,113 @@
 :root {
-  --keyboard-height: 200px
+    --keyboard-height: 200px
 }
 
 main {
-  height: 100%
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .game {
-  display: flex;
-  flex-direction: column;
-  height: 100%
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
 }
 
 body,
 html {
-  margin: 0;
-  padding: 0;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-  -webkit-touch-callout: none; /* Disable double tap to zoom on Safari */
-}
-
-canvas {
-  display: block;
-  margin: 0 auto;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    -webkit-touch-callout: none; /* Disable double tap to zoom on Safari */
 }
 
 .canvas-container {
-  flex-grow: 1
+    flex-grow: 1;
+    max-height: 800px;
+    max-width: 480px;
+    width: 100%;
+    /*border: red 1px solid;*/
+}
+
+.canvas-viewport {
+    /*border: green 1px solid;*/
+}
+
+canvas {
+    display: block;
+    margin: 0 auto;
 }
 
 .keyboard {
-  height: var(--keyboard-height);
-  width: 100%;
-  margin-top: 8px;
-  user-select: none;
-  -webkit-user-select: none;
-  -moz-user-select: none;
+    height: var(--keyboard-height);
+    width: 100%;
+    margin-top: 8px;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
 }
 
 .keyboard-row {
-  display: flex;
-  width: 100%;
-  margin: 0 auto 8px;
-  touch-action: manipulation;
-  justify-content: center;
+    display: flex;
+    width: 100%;
+    margin: 0 auto 8px;
+    touch-action: manipulation;
+    justify-content: center;
 }
 
 .keyboard-button {
-  height: 58px;
-  max-width: 44px;
-  /*width: 44px; !* overwritten with js *!*/
-  margin: 0 6px 0 0;
-  border: 1px solid #000;
-  border-radius: 5px;
-  background-color: #fff;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  box-sizing: border-box;
-  cursor: pointer;
-  transition: background-color 0.3s;
+    height: 58px;
+    max-width: 44px;
+    /*width: 44px; !* overwritten with js *!*/
+    margin: 0 6px 0 0;
+    border: 1px solid #000;
+    border-radius: 5px;
+    background-color: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-sizing: border-box;
+    cursor: pointer;
+    transition: background-color 0.3s;
 }
 
 p {
-  margin: 0;
-  font-size: 20px;
-  color: #000;
+    margin: 0;
+    font-size: 20px;
+    color: #000;
 }
 
 .keyboard-button:last-child {
-  margin-right: 0;
+    margin-right: 0;
 }
 
 .keyboard-enter {
-  max-width: 80px;
+    max-width: 80px;
 }
+
 .keyboard-del {
-  max-width: 80px;
+    max-width: 80px;
 }
 
 /* smaller screens */
 @media screen and (max-width: 768px) {
-  /*.keyboard {*/
-  /*}*/
-
-  /*.keyboard-button {*/
-  /*  font-size: 5vw;*/
-  /*  color: aqua;*/
-  /*}*/
-
-  /*.keyboard-enter {*/
-  /*  width: calc(100% / 5 - 4px);*/
-  /*}*/
-
-  /*.keyboard-del {*/
-  /*  width: calc(100% / 5 - 4px);*/
-  /*}*/
+    /*.keyboard {*/
+    /*}*/
+    /*.keyboard-button {*/
+    /*  font-size: 5vw;*/
+    /*  color: aqua;*/
+    /*}*/
+    /*.keyboard-enter {*/
+    /*  width: calc(100% / 5 - 4px);*/
+    /*}*/
+    /*.keyboard-del {*/
+    /*  width: calc(100% / 5 - 4px);*/
+    /*}*/
 }

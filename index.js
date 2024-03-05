@@ -56,12 +56,22 @@ function setKeyboardKeyWidth(width) {
 const canvas = document.getElementById("canvas");
 const context = canvas.getContext("2d");
 
+const NUM_COLUMNS = 7;
+
+let levelWidth = canvas.width // tileSize * (NUM_COLUMNS + 0.5);
+let tileSize = canvas.width / (NUM_COLUMNS + 0.5);
+let levelHeight = tileSize * 10;
+
 function setGameDimensions() {
   const keyboardKeyWidth = calculateKeyboardKeyWidth();
   setKeyboardKeyWidth(keyboardKeyWidth);
   const canvasContainer = document.querySelector(".canvas-container");
   canvas.width = canvasContainer.offsetWidth;
   canvas.height = canvasContainer.offsetHeight;
+
+  levelWidth = canvas.width;
+  tileSize = canvas.width / (NUM_COLUMNS + 0.5);
+  levelHeight = tileSize * 10;
 }
 
 window.onresize = function() {
@@ -88,11 +98,8 @@ window.onload = function() {
 
   // Options
   const SHOW_FPS = false;
-  const SHOW_DEBUG_INFO = false;
+  const SHOW_DEBUG_INFO = true;
 
-  const NUM_COLUMNS = 7;
-  const TILE_SIZE = Math.min(50, canvas.width / (NUM_COLUMNS + 0.5));
-  const LEVEL_WIDTH = TILE_SIZE * (NUM_COLUMNS + 0.5);
   const FONT_SIZE = 24;
   const DROP_SPEED = 1000;
 
@@ -132,17 +139,13 @@ window.onload = function() {
   };
 
   const level = {
-    x: canvas.width / 2 - LEVEL_WIDTH / 2, // x posn
+    x: canvas.width / 2 - levelWidth / 2, // x posn
     y: 0, // y posn
-    width: LEVEL_WIDTH,
-    height: 0, // height - gets calculated
     columns: NUM_COLUMNS, // number of columns
     // rows: 10, // number of possible rows in the level - TODO: not used currently, but do we want this to control the height of the level?
     startingRows: 3, // number of rows to start with
-    tileWidth: TILE_SIZE, // width of each tile
-    tileHeight: TILE_SIZE, // height of each tile
-    rowHeight: TILE_SIZE * Math.cos(degToRad(30)), // height of each row
-    radius: TILE_SIZE / 2, // radius of the circle
+    rowHeight: () => tileSize * Math.cos(degToRad(30)), // height of each row
+    radius: () => tileSize / 2, // radius of the circle
     tiles: [], // 2d array to hold the tiles
     reachableTiles: [], // tiles that can be reached by the turret
     availableChars: {}, // remaining chars that can be used to form words
@@ -253,9 +256,8 @@ window.onload = function() {
 
     initKeyboard();
 
-    level.height = canvas.height;
-    player.centerX = level.x + level.width / 2;
-    player.centerY = level.height - FLOOR_HEIGHT - TURRET_HEIGHT;
+    player.centerX = level.x + levelWidth / 2;
+    player.centerY = levelHeight - FLOOR_HEIGHT - TURRET_HEIGHT;
 
     resetLevel();
     newRound();
@@ -385,14 +387,14 @@ window.onload = function() {
   }
 
   function getTileCoordinate(row, col) {
-    let x = level.x + col * level.tileWidth;
+    let x = level.x + col * tileSize;
     // If the row is even, the x position is shifted over
     if ((row + rowOffset) % 2 === 0) {
-      x += level.tileWidth / 2;
+      x += tileSize / 2;
     }
-    const y = row * level.rowHeight;
-    const centerX = x + level.tileWidth / 2;
-    const centerY = y + level.tileHeight / 2;
+    const y = row * level.rowHeight();
+    const centerX = x + tileSize / 2;
+    const centerY = y + tileSize / 2;
     return { x, y, centerX, centerY };
   }
 
@@ -544,7 +546,7 @@ window.onload = function() {
           tile.shift += tile.velocity * dt;
           const tileY = getTileCoordinate(i, j).y + tile.shift;
 
-          if (tileY > level.height - TILE_SIZE) {
+          if (tileY > levelHeight - tileSize) {
             // Remove the tile when it's below the floor
             level.tiles[i][j] = null;
           }
@@ -560,21 +562,21 @@ window.onload = function() {
     const gradient = context.createLinearGradient(
       0,
       0,
-      level.width,
-      level.height,
+      levelWidth,
+      levelHeight,
     );
     gradient.addColorStop(0, "#fdfbfb"); // Light shade of gray
     gradient.addColorStop(1, "#ebedee"); // Slightly darker shade of gray
     context.fillStyle = gradient;
-    context.fillRect(level.x, level.y, level.width, level.height);
+    context.fillRect(level.x, level.y, levelWidth, levelHeight);
 
     // Draw Floor
     context.fillStyle = "#000";
     context.fillRect(
       level.x,
-      level.height - FLOOR_HEIGHT,
-      level.width,
-      level.height,
+      levelHeight - FLOOR_HEIGHT,
+      levelWidth,
+      levelHeight,
     );
   }
 
@@ -593,9 +595,9 @@ window.onload = function() {
           context.fillStyle = colors.unavailableTile;
           context.beginPath();
           context.arc(
-            tileX + level.radius,
-            tileY + level.radius,
-            level.radius,
+            tileX + level.radius(),
+            tileY + level.radius(),
+            level.radius(),
             0,
             Math.PI * 2,
             false,
@@ -619,8 +621,8 @@ window.onload = function() {
           drawCenterText(
             tile.val,
             tile.fontSize,
-            tileX + level.radius,
-            tileY + level.radius,
+            tileX + level.radius(),
+            tileY + level.radius(),
           );
         }
       }
@@ -694,7 +696,7 @@ window.onload = function() {
       Math.pow(player.centerX - tile.centerX, 2) +
       Math.pow(player.centerY - tile.centerY, 2),
     );
-    const beta = radToDeg(Math.asin(level.radius / distance));
+    const beta = radToDeg(Math.asin(level.radius() / distance));
     const rightBound = tileCenterAngle - beta;
     const leftBound = tileCenterAngle + beta;
     if (angle >= rightBound && angle <= leftBound) {
@@ -719,7 +721,7 @@ window.onload = function() {
     for (let j = 0; j < level.columns; j++) {
       if (level.tiles[lastRowIdx][j]) {
         const { y } = getTileCoordinate(lastRowIdx, j);
-        if (y + level.tileHeight > player.centerY - level.tileHeight / 2) {
+        if (y + tileSize > player.centerY - tileSize / 2) {
           gameState = gameStates.lose;
         }
       }
@@ -853,9 +855,9 @@ window.onload = function() {
           const { x: tileX, y: tileY } = getTileCoordinate(i, j);
           if (
             x > tileX &&
-            x < tileX + level.tileWidth &&
+            x < tileX + tileSize &&
             y > tileY &&
-            y < tileY + level.tileHeight
+            y < tileY + tileSize
           ) {
             return tile;
             break;
@@ -867,8 +869,8 @@ window.onload = function() {
 
   function renderPlayer() {
     const TURRET_WIDTH = 60;
-    const centerX = level.x + level.width / 2;
-    const centerY = level.height - TURRET_HEIGHT - FLOOR_HEIGHT;
+    const centerX = level.x + levelWidth / 2;
+    const centerY = levelHeight - TURRET_HEIGHT - FLOOR_HEIGHT;
 
 
     // Draw line representing bullet path, stopping at first tile or wall
@@ -885,7 +887,7 @@ window.onload = function() {
       distance = getDistanceToTileEdge(centerX, centerY, player.angle, tileInPath.centerX, tileInPath.centerY);
     } else {
       level.tileInPath = null;
-      distance = level.width;
+      distance = levelWidth;
     }
     const x = centerX + distance * Math.cos(degToRad(player.angle));
     const y = centerY - distance * Math.sin(degToRad(player.angle));
@@ -911,8 +913,8 @@ window.onload = function() {
     context.beginPath();
     context.moveTo(centerX, centerY);
     context.lineTo(
-      centerX + 0.8 * level.tileWidth * Math.cos(degToRad(player.angle)),
-      centerY - 0.8 * level.tileHeight * Math.sin(degToRad(player.angle)),
+      centerX + 0.8 * tileSize * Math.cos(degToRad(player.angle)),
+      centerY - 0.8 * tileSize * Math.sin(degToRad(player.angle)),
     );
     context.stroke();
   }
@@ -927,7 +929,7 @@ window.onload = function() {
       Math.pow(yStart - yTile, 2),
     );
 
-    const a = level.radius;
+    const a = level.radius();
     const b = distanceToTile;
     const angleA = theta;
     const [c1, c2] = solveQuadratic(
@@ -991,39 +993,39 @@ window.onload = function() {
     for (let i = 0; i < player.word.length; i++) {
       const tile = player.word[i];
       const x = level.x + WORD_PREVIEW_BUBBLE_RADIUS + i * CHAR_SPACE;
-      const y = level.height - FLOOR_HEIGHT / 2;
+      const y = levelHeight - FLOOR_HEIGHT / 2;
       renderCharBubble(tile.val, x, y);
     }
   }
 
   function renderLoseScreen() {
     context.fillStyle = colors.beige1;
-    context.fillRect(level.x, level.y, level.width, level.height);
+    context.fillRect(level.x, level.y, levelWidth, levelHeight);
     context.fillStyle = "black";
     context.font = "24px Times";
-    drawCenterText("You lose!", 24, level.width / 2, level.height / 2);
+    drawCenterText("You lose!", 24, levelWidth / 2, levelHeight / 2);
     context.font = "20px Times";
     drawCenterText(
       "Press any key to restart",
       24,
-      level.width / 2,
-      level.height / 2 + 30,
+      levelWidth / 2,
+      levelHeight / 2 + 30,
     );
     context.fill();
   }
 
   function renderWinScreen() {
     context.fillStyle = colors.beige1;
-    context.fillRect(level.x, level.y, level.width, level.height);
+    context.fillRect(level.x, level.y, levelWidth, levelHeight);
     context.fillStyle = "black";
     context.font = "24px Times";
-    drawCenterText("You win!", 24, level.width / 2, level.height / 2);
+    drawCenterText("You win!", 24, levelWidth / 2, levelHeight / 2);
     context.font = "20px Times";
     drawCenterText(
       "Press any key to restart",
       24,
-      level.width / 2,
-      level.height / 2 + 30,
+      levelWidth / 2,
+      levelHeight / 2 + 30,
     );
     context.fill();
   }
