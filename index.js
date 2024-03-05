@@ -57,6 +57,7 @@ const canvas = document.getElementById("canvas");
 const context = canvas.getContext("2d");
 
 const NUM_COLUMNS = 7;
+const NUM_STARTING_ROWS = 3;
 
 let levelWidth = canvas.width // tileSize * (NUM_COLUMNS + 0.5);
 let tileSize = canvas.width / (NUM_COLUMNS + 0.5);
@@ -141,9 +142,6 @@ window.onload = function() {
   const level = {
     x: canvas.width / 2 - levelWidth / 2, // x posn
     y: 0, // y posn
-    columns: NUM_COLUMNS, // number of columns
-    // rows: 10, // number of possible rows in the level - TODO: not used currently, but do we want this to control the height of the level?
-    startingRows: 3, // number of rows to start with
     rowHeight: () => tileSize * Math.cos(degToRad(30)), // height of each row
     radius: () => tileSize / 2, // radius of the circle
     tiles: [], // 2d array to hold the tiles
@@ -235,9 +233,9 @@ window.onload = function() {
   function resetLevel() {
     rowOffset = 0;
     level.tiles = [];
-    for (let i = 0; i < level.startingRows; i++) {
+    for (let i = 0; i < NUM_STARTING_ROWS; i++) {
       level.tiles[i] = [];
-      for (let j = 0; j < level.columns; j++) {
+      for (let j = 0; j < NUM_COLUMNS; j++) {
         const val = getRandomLetter();
         const { x, y } = getTileCoordinate(i, j);
         level.tiles[i][j] = new Tile(i, j, val);
@@ -297,7 +295,7 @@ window.onload = function() {
   function findTileByChar(char) {
     tiles = [];
     for (let i = level.tiles.length - 1; i >= 0; i--) {
-      for (let j = 0; j < level.columns; j++) {
+      for (let j = 0; j < NUM_COLUMNS; j++) {
         const tile = level.tiles[i][j];
         if (tile && tile.val.toLowerCase() === char) {
           tiles.push(tile);
@@ -421,7 +419,7 @@ window.onload = function() {
         i + x < 0 ||
         i + x >= level.tiles.length ||
         j + y < 0 ||
-        j + y >= level.columns
+        j + y >= NUM_COLUMNS
       )
         continue;
       const neighbor = level.tiles[i + x][j + y];
@@ -443,7 +441,7 @@ window.onload = function() {
 
     // first pass, mark tiles touching ceiling and populate the rest with "unvisited"
     // mark top tiles
-    for (let j = 0; j < level.columns; j++) {
+    for (let j = 0; j < NUM_COLUMNS; j++) {
       const tile = level.tiles[0][j];
       if (tile) {
         if (tile.shouldRemove) {
@@ -457,14 +455,14 @@ window.onload = function() {
     }
     for (let i = 1; i < level.tiles.length; i++) {
       tilesTouchingCeiling[i] = [];
-      for (let j = 0; j < level.columns; j++) {
+      for (let j = 0; j < NUM_COLUMNS; j++) {
         tilesTouchingCeiling[i].push(tileState.unvisited);
       }
     }
 
     const stack = [];
 
-    for (let j = 0; j < level.columns; j++) {
+    for (let j = 0; j < NUM_COLUMNS; j++) {
       const tile = level.tiles[0][j];
       if (tile && tilesTouchingCeiling[0][j] == tileState.connectedToCeiling) {
         stack.push(tile);
@@ -487,7 +485,7 @@ window.onload = function() {
     }
 
     for (let i = 1; i < level.tiles.length; i++) {
-      for (let j = 0; j < level.columns; j++) {
+      for (let j = 0; j < NUM_COLUMNS; j++) {
         if (tilesTouchingCeiling[i][j] != tileState.connectedToCeiling) {
           if (level.tiles[i][j]) {
             removeTile(i, j);
@@ -504,7 +502,7 @@ window.onload = function() {
   function addRow() {
     // remove any falling tiles
     for (let i = level.tiles.length - 1; i >= 0; i--) {
-      for (let j = 0; j < level.columns; j++) {
+      for (let j = 0; j < NUM_COLUMNS; j++) {
         const tile = level.tiles[i][j];
         if (tile && tile.state == "remove") {
           level.tiles[i][j] = null;
@@ -516,14 +514,14 @@ window.onload = function() {
 
     rowOffset = rowOffset === 0 ? 1 : 0;
     level.tiles.unshift([]);
-    for (let j = 0; j < level.columns; j++) {
+    for (let j = 0; j < NUM_COLUMNS; j++) {
       const val = getRandomLetter();
       const { x, y } = getTileCoordinate(0, j);
       level.tiles[0][j] = new Tile(0, j, val);
     }
     // shift i of all tiles
     for (let i = 1; i < level.tiles.length; i++) {
-      for (let j = 0; j < level.columns; j++) {
+      for (let j = 0; j < NUM_COLUMNS; j++) {
         const tile = level.tiles[i][j];
         if (tile) {
           tile.i++;
@@ -538,7 +536,7 @@ window.onload = function() {
   function stateRemoveTiles(dt) {
     let removingTiles = false;
     for (let i = level.tiles.length - 1; i >= 0; i--) {
-      for (let j = 0; j < level.columns; j++) {
+      for (let j = 0; j < NUM_COLUMNS; j++) {
         const tile = level.tiles[i][j];
         if (tile && tile.shouldRemove) {
           removingTiles = true;
@@ -583,7 +581,7 @@ window.onload = function() {
   function renderTiles() {
     // Top to bottom
     for (let i = 0; i < level.tiles.length; i++) {
-      for (let j = 0; j < level.columns; j++) {
+      for (let j = 0; j < NUM_COLUMNS; j++) {
         const row = level.tiles[i];
         if (!row) continue;
         const tile = level.tiles[i][j];
@@ -718,7 +716,7 @@ window.onload = function() {
 
   function checkLose() {
     const lastRowIdx = level.tiles.length - 1;
-    for (let j = 0; j < level.columns; j++) {
+    for (let j = 0; j < NUM_COLUMNS; j++) {
       if (level.tiles[lastRowIdx][j]) {
         const { y } = getTileCoordinate(lastRowIdx, j);
         if (y + tileSize > player.centerY - tileSize / 2) {
@@ -730,7 +728,7 @@ window.onload = function() {
 
   function checkWin() {
     for (let i = level.tiles.length - 1; i >= 0; i--) {
-      for (let j = 0; j < level.columns; j++) {
+      for (let j = 0; j < NUM_COLUMNS; j++) {
         if (level.tiles[i][j]) {
           return false;
         }
@@ -849,7 +847,7 @@ window.onload = function() {
 
   function getTileUnderneathMouse(x, y) {
     for (let i = level.tiles.length - 1; i >= 0; i--) {
-      for (let j = 0; j < level.columns; j++) {
+      for (let j = 0; j < NUM_COLUMNS; j++) {
         const tile = level.tiles[i][j];
         if (tile) {
           const { x: tileX, y: tileY } = getTileCoordinate(i, j);
@@ -957,7 +955,7 @@ window.onload = function() {
 
   function getFirstTileInPath(angle) {
     for (let i = level.tiles.length - 1; i >= 0; i--) {
-      for (let j = 0; j < level.columns; j++) {
+      for (let j = 0; j < NUM_COLUMNS; j++) {
         const tile = level.tiles[i][j];
         if (tile && doesCollide(angle, tile)) {
           return tile;
