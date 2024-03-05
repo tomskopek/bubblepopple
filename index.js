@@ -239,6 +239,9 @@ window.onload = function() {
   function resetLevel() {
     rowOffset = 0;
     level.tiles = [];
+    player.score = 0
+    freezeTimeMs = 0;
+    tileDescentSpeed = 0.10;
     for (let i = 0; i < NUM_STARTING_ROWS; i++) {
       level.tiles[i] = [];
       for (let j = 0; j < NUM_COLUMNS; j++) {
@@ -668,7 +671,7 @@ window.onload = function() {
             context.fillStyle = colors.reachableTile;
           }
           context.fill();
-          context.font = `${tile.fontSize}px Times`;
+          context.font = `${tile.fontSize}px Josefin Sans`;
           context.fillStyle = "#000";
           drawCenterText(
             tile.val,
