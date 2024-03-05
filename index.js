@@ -36,14 +36,16 @@ colors.reachableUnavailableKeyboard = colors.beige6;
 // Important game variables
 const NUM_COLUMNS = 7;
 const NUM_STARTING_ROWS = 3;
-let TILE_DESCENT_SPEED = 0.10; // how many new tiles should be added per 1 second TODO: make this a function of level
+let tileDescentSpeed = 0.10; // how many new tiles should be added per 1 second TODO: make this a function of level
 
 const canvas = document.getElementById("canvas");
 const context = canvas.getContext("2d");
-let levelWidth = canvas.width // tileSize * (NUM_COLUMNS + 0.5);
+let levelWidth = canvas.width; // tileSize * (NUM_COLUMNS + 0.5);
 let tileSize = canvas.width / (NUM_COLUMNS + 0.5);
 let levelHeight = tileSize * 10;
 let rowHeight = tileSize * Math.cos(degToRad(30));
+
+let gameTimeMs = 0; // used for increasing difficulty
 
 function calculateKeyboardKeyWidth() {
   const keyboardRowWidth = document.querySelector(".keyboard-row").offsetWidth;
@@ -138,6 +140,7 @@ window.onload = function() {
     canvasHeight: canvas.height,
     keyboardRowWidth: document.querySelector(".keyboard-row").offsetWidth,
     keyboardKeyWidth: calculateKeyboardKeyWidth(),
+    tileDescentSpeed: tileDescentSpeed,
   };
 
   const level = {
@@ -157,6 +160,7 @@ window.onload = function() {
     mouseY: 0, // gets calculated
     angle: 0, // gets calculated
     word: [],
+    previousWords: [],
     score: 0,
   };
 
@@ -320,13 +324,15 @@ window.onload = function() {
 
   function update(tframe) {
     const dt = (tframe - lastFrame) / 1000;
+    gameTimeMs += tframe - lastFrame
     lastFrame = tframe;
 
     updateFps(dt);
 
 
     if (gameState == gameStates.idle) {
-      moveTilesDown(dt)
+      moveTilesDown(dt);
+      checkIncreaseDifficulty();
       findReachableTiles();
       findAvailableChars();
       checkGameOver();
@@ -352,22 +358,31 @@ window.onload = function() {
       for (let j = 0; j < NUM_COLUMNS; j++) {
         const tile = level.tiles[i][j];
         if (tile) {
-          tile.shift += tileSize * dt * TILE_DESCENT_SPEED;
+          tile.shift += tileSize * dt * tileDescentSpeed;
         }
       }
+    }
+  }
+
+  function checkIncreaseDifficulty() {
+    // increase difficulty every x seconds
+    if (gameTimeMs > 20 * 1000) {
+      tileDescentSpeed *= 1.1
+      debug.tileDescentSpeed = tileDescentSpeed;
+      gameTimeMs = 0;
     }
   }
 
   function renderKeyboard() {
     document.querySelectorAll(".keyboard-button").forEach((key) => {
       key.style.backgroundColor = colors.unavailableTile;
-    })
+    });
     for (const tile of level.reachableTiles) {
-        if (level.availableChars[tile.val.toUpperCase()] > 0) {
-          document.getElementById(tile.val.toLowerCase()).style.backgroundColor = colors.reachableTile;
-        } else {
-          document.getElementById(tile.val.toLowerCase()).style.backgroundColor = colors.reachableUnavailableKeyboard;
-        }
+      if (level.availableChars[tile.val.toUpperCase()] > 0) {
+        document.getElementById(tile.val.toLowerCase()).style.backgroundColor = colors.reachableTile;
+      } else {
+        document.getElementById(tile.val.toLowerCase()).style.backgroundColor = colors.reachableUnavailableKeyboard;
+      }
     }
   }
 
@@ -384,7 +399,7 @@ window.onload = function() {
     renderScore();
     renderKeyboard();
     if (SHOW_FPS) renderFps(context, level);
-    if (SHOW_DEBUG_INFO) renderDebugInfo(context, level, player, debug);
+    if (SHOW_DEBUG_INFO) renderDebugInfo(context, level, levelHeight, player, debug);
   }
 
   function getTileCoordinate(row, col) {
@@ -509,7 +524,7 @@ window.onload = function() {
       // add new row
       const val = getRandomLetter();
       level.tiles[0][j] = new Tile(0, j, val);
-      level.tiles[0][j].shift = -rowHeight
+      level.tiles[0][j].shift = -rowHeight;
     }
     // shift -50 on all tiles
     for (let i = 1; i < level.tiles.length; i++) {
@@ -769,6 +784,7 @@ window.onload = function() {
       removeFloatingTiles();
       removeTiles();
       player.word = [];
+      player.previousWords.push(word);
       if (word.length == 3) {
         player.score += 1;
       } else if (word.length == 4) {
@@ -1024,8 +1040,25 @@ window.onload = function() {
   }
 
   function renderGameOverScreen() {
+    // background
     context.fillStyle = colors.beige1;
     context.fillRect(level.x, level.y, levelWidth, levelHeight);
+
+    // show player's previous words
+    context.fillStyle = colors.blue3;
+    let x = 12;
+    let y = 0; // margin + font size
+    for (let i = 0; i < player.previousWords.length; i++) {
+      const word = player.previousWords[i];
+      y += 24;
+      if (y > levelHeight) {
+        y = 12 + 14;
+        x += 120;
+      }
+      context.font = "14px Josefin Sans";
+      context.fillText(word, x, y);
+    }
+
     context.fillStyle = "black";
     context.font = "24px Chivo Mono";
     drawCenterText(`Score`, 24, levelWidth / 2, levelHeight / 2 - 80);
