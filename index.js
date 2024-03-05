@@ -43,6 +43,7 @@ const context = canvas.getContext("2d");
 let levelWidth = canvas.width // tileSize * (NUM_COLUMNS + 0.5);
 let tileSize = canvas.width / (NUM_COLUMNS + 0.5);
 let levelHeight = tileSize * 10;
+let rowHeight = tileSize * Math.cos(degToRad(30));
 
 function calculateKeyboardKeyWidth() {
   const keyboardRowWidth = document.querySelector(".keyboard-row").offsetWidth;
@@ -71,9 +72,11 @@ function setGameDimensions() {
   canvas.width = canvasContainer.offsetWidth;
   canvas.height = canvasContainer.offsetHeight;
 
+  // recalculate important things
   levelWidth = canvas.width;
   tileSize = canvas.width / (NUM_COLUMNS + 0.5);
   levelHeight = tileSize * 10;
+  rowHeight = tileSize * Math.cos(degToRad(30));
 }
 
 window.onresize = function() {
@@ -140,7 +143,6 @@ window.onload = function() {
   const level = {
     x: canvas.width / 2 - levelWidth / 2, // x posn
     y: 0, // y posn
-    rowHeight: () => tileSize * Math.cos(degToRad(30)), // height of each row
     radius: () => tileSize / 2, // radius of the circle
     tiles: [], // 2d array to hold the tiles
     reachableTiles: [], // tiles that can be reached by the turret
@@ -262,12 +264,6 @@ window.onload = function() {
   }
 
   function initKeyboard() {
-    // document
-    //   .getElementById("dumpButton")
-    //   .addEventListener("click", function() {
-    //     addRow();
-    //   });
-
     document.getElementById("backspace").addEventListener("click", function() {
       deleteLastLetter();
     });
@@ -397,7 +393,7 @@ window.onload = function() {
     if ((row + rowOffset) % 2 === 0) {
       x += tileSize / 2;
     }
-    const y = row * level.rowHeight();
+    const y = row * rowHeight;
     const centerX = x + tileSize / 2;
     const centerY = y + tileSize / 2;
     return { x, y, centerX, centerY };
@@ -513,7 +509,7 @@ window.onload = function() {
       // add new row
       const val = getRandomLetter();
       level.tiles[0][j] = new Tile(0, j, val);
-      level.tiles[0][j].shift = -50
+      level.tiles[0][j].shift = -rowHeight
     }
     // shift -50 on all tiles
     for (let i = 1; i < level.tiles.length; i++) {
@@ -521,7 +517,7 @@ window.onload = function() {
         const tile = level.tiles[i][j];
         if (tile) {
           tile.i++;
-          tile.shift -= 50;
+          tile.shift -= rowHeight;
         }
       }
     }
@@ -803,7 +799,7 @@ window.onload = function() {
     if (key === "BACKSPACE") {
       deleteLastLetter();
     } else if (key === " ") {
-      addRow();
+      // addRow();
       resetWord();
     } else if (key === "TAB") {
       // TODO: target another tile
