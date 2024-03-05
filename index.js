@@ -138,8 +138,6 @@ window.onload = function() {
     windowInnerWidth: window.innerWidth,
     canvasWidth: canvas.width,
     canvasHeight: canvas.height,
-    keyboardRowWidth: document.querySelector(".keyboard-row").offsetWidth,
-    keyboardKeyWidth: calculateKeyboardKeyWidth(),
     tileDescentSpeed: tileDescentSpeed,
   };
 
