@@ -37,6 +37,7 @@ colors.reachableUnavailableKeyboard = colors.beige6;
 const NUM_COLUMNS = 7;
 const NUM_STARTING_ROWS = 3;
 let tileDescentSpeed = 0.10; // how many new tiles should be added per 1 second TODO: make this a function of level
+let freezeTimeMs = 0; // how many seconds to freeze time for when a word is formed
 
 const canvas = document.getElementById("canvas");
 const context = canvas.getContext("2d");
@@ -344,6 +345,10 @@ window.onload = function() {
   }
 
   function moveTilesDown(dt) {
+    if (freezeTimeMs > 0) {
+      freezeTimeMs -= dt * 1000;
+      return;
+    }
     for (let j = 0; j < NUM_COLUMNS; j++) {
       // insert a new top row if the top row is not touching ceiling
       const tile = level.tiles[0][j];
@@ -787,9 +792,10 @@ window.onload = function() {
         player.score += 1;
       } else if (word.length == 4) {
         player.score += 4;
-        // TODO: freeze time for a bit?
+        freezeTimeMs += 1500;
       } else if (word.length >= 5) {
         player.score += 8;
+        freezeTimeMs += 3000;
         // TODO: give player a bomb to use?
       }
     } else {
