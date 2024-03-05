@@ -36,7 +36,7 @@ colors.reachableUnavailableKeyboard = colors.beige6;
 // Important game variables
 const NUM_COLUMNS = 7;
 const NUM_STARTING_ROWS = 3;
-
+let TILE_DESCENT_SPEED = 0.10; // how many new tiles should be added per 1 second TODO: make this a function of level
 
 const canvas = document.getElementById("canvas");
 const context = canvas.getContext("2d");
@@ -158,6 +158,7 @@ window.onload = function() {
     mouseY: 0, // gets calculated
     angle: 0, // gets calculated
     word: [],
+    score: 0,
   };
 
   class Tile {
@@ -331,7 +332,11 @@ window.onload = function() {
 
     updateFps(dt);
 
+
     if (gameState == gameStates.idle) {
+      moveTilesDown(dt)
+      findReachableTiles();
+      findAvailableChars();
       checkWin();
       checkLose();
       clearEmptyRow();
@@ -341,8 +346,6 @@ window.onload = function() {
       gameState = gameStates.waitingForCollisionCheck;
     } else if (gameState == gameStates.waitingForCollisionCheck) {
       player.angle = 90;
-      findReachableTiles();
-      findAvailableChars();
       gameState = gameStates.idle;
     } else if (gameState == gameStates.removing) {
       stateRemoveTiles(dt);
@@ -350,6 +353,25 @@ window.onload = function() {
       renderLoseScreen();
     } else if (gameState == gameStates.win) {
       renderWinScreen();
+    }
+  }
+
+  function moveTilesDown(dt) {
+    for (let j = 0; j < NUM_COLUMNS; j++) {
+      // insert a new top row if the top row is not touching ceiling
+      const tile = level.tiles[0][j];
+      if (tile && tile.y + tile.shift > level.y) {
+        addRowOffscreen();
+        break;
+      }
+    }
+    for (let i = level.tiles.length - 1; i >= 0; i--) {
+      for (let j = 0; j < NUM_COLUMNS; j++) {
+        const tile = level.tiles[i][j];
+        if (tile) {
+          tile.shift += tileSize * dt * TILE_DESCENT_SPEED;
+        }
+      }
     }
   }
 
@@ -380,6 +402,7 @@ window.onload = function() {
     renderTiles();
     renderPlayer();
     renderWord();
+    renderScore();
     renderKeyboard();
     if (SHOW_FPS) renderFps(context, level);
     if (SHOW_DEBUG_INFO) renderDebugInfo(context, level, player, debug);
@@ -500,6 +523,27 @@ window.onload = function() {
     gameState = gameStates.removing;
   }
 
+  function addRowOffscreen() {
+    rowOffset = rowOffset === 0 ? 1 : 0;
+    level.tiles.unshift([]);
+    for (let j = 0; j < NUM_COLUMNS; j++) {
+      // add new row
+      const val = getRandomLetter();
+      level.tiles[0][j] = new Tile(0, j, val);
+      level.tiles[0][j].shift = -50
+    }
+    // shift -50 on all tiles
+    for (let i = 1; i < level.tiles.length; i++) {
+      for (let j = 0; j < NUM_COLUMNS; j++) {
+        const tile = level.tiles[i][j];
+        if (tile) {
+          tile.i++;
+          tile.shift -= 50;
+        }
+      }
+    }
+  }
+
   function addRow() {
     // remove any falling tiles
     for (let i = level.tiles.length - 1; i >= 0; i--) {
@@ -507,8 +551,8 @@ window.onload = function() {
         const tile = level.tiles[i][j];
         if (tile && tile.state == "remove") {
           level.tiles[i][j] = null;
-          level.tiles[i][j].leftAngleBound = null;
-          level.tiles[i][j].rightAngleBound = null;
+          // level.tiles[i][j].leftAngleBound = null;
+          // level.tiles[i][j].rightAngleBound = null;
         }
       }
     }
@@ -517,7 +561,6 @@ window.onload = function() {
     level.tiles.unshift([]);
     for (let j = 0; j < NUM_COLUMNS; j++) {
       const val = getRandomLetter();
-      const { x, y } = getTileCoordinate(0, j);
       level.tiles[0][j] = new Tile(0, j, val);
     }
     // shift i of all tiles
@@ -751,13 +794,22 @@ window.onload = function() {
       .join("")
       .toLowerCase();
     const isWord = findSuccinctWord(word);
-    if (isWord) {
+    if (isWord && word.length >= 3) {
       for (const tile of player.word) {
         removeTile(tile.i, tile.j);
       }
       removeFloatingTiles();
       removeTiles();
       player.word = [];
+      if (word.length == 3) {
+        player.score += 1;
+      } else if (word.length == 4) {
+        player.score += 4;
+        // TODO: freeze time for a bit?
+      } else if (word.length >= 5) {
+        player.score += 8;
+        // TODO: give player a bomb to use?
+      }
     } else {
       // TODO: animate deny word briefly
       resetWord();
@@ -997,18 +1049,26 @@ window.onload = function() {
     }
   }
 
+  function renderScore() {
+    context.font = "24px Chivo Mono";
+    context.fillStyle = colors.beige1;
+    drawCenterText(`Score: ${player.score}`, 24, levelWidth / 2, levelHeight - 24);
+  }
+
   function renderLoseScreen() {
     context.fillStyle = colors.beige1;
     context.fillRect(level.x, level.y, levelWidth, levelHeight);
     context.fillStyle = "black";
-    context.font = "24px Times";
-    drawCenterText("You lose!", 24, levelWidth / 2, levelHeight / 2);
-    context.font = "20px Times";
+    context.font = "24px Chivo Mono";
+    drawCenterText(`Score`, 24, levelWidth / 2, levelHeight / 2 - 80);
+    context.font = "80px Chivo Mono";
+    drawCenterText(`${player.score}`, 80, levelWidth / 2, levelHeight / 2);
+    context.font = "20px Chivo Mono";
     drawCenterText(
       "Press any key to restart",
       24,
       levelWidth / 2,
-      levelHeight / 2 + 30,
+      levelHeight / 2 + 80,
     );
     context.fill();
   }
