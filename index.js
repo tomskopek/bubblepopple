@@ -48,6 +48,8 @@ let rowHeight = tileSize * Math.cos(degToRad(30));
 
 let gameTimeMs = 0; // used for increasing difficulty
 
+let tabOffset = 0;
+
 function calculateKeyboardKeyWidth() {
   const keyboardRowWidth = document.querySelector(".keyboard-row").offsetWidth;
   const maxKeysInRow = 10;
@@ -834,16 +836,40 @@ window.onload = function() {
       // addRow();
       resetWord();
     } else if (key === "TAB") {
-      // TODO: target another tile
+      e.preventDefault();
+      const lastChar = player.word[player.word.length - 1].val;
+      cycleTileByChar(lastChar);
     } else if (key === "ENTER") {
       submitWord();
     } else if (key.match(/[A-Z]/)) {
-      for (const tile of level.reachableTiles) {
-        if (tile.val === key && tile.isAvailable()) {
-          tile.target();
-          player.word.push(tile);
-          break;
-        }
+      selectTileByChar(key);
+    }
+  }
+
+  function selectTileByChar(char) {
+    for (const tile of level.reachableTiles) {
+      if (tile.val === char && tile.isAvailable()) {
+        tile.target();
+        player.word.push(tile);
+        break;
+      }
+    }
+  }
+
+  function cycleTileByChar(char) {
+    const reachableTiles = []
+    for (const tile of level.reachableTiles) {
+      if (tile.val === char) {
+        reachableTiles.push(tile);
+      }
+    }
+    if (reachableTiles.length > 0) {
+      tabOffset = (tabOffset + 1) % reachableTiles.length;
+      const tile = reachableTiles[tabOffset];
+      if (tile.isAvailable()) {
+        deleteLastLetter();
+        tile.target();
+        player.word.push(tile);
       }
     }
   }
