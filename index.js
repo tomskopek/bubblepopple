@@ -33,6 +33,17 @@ colors.unavailableTile = colors.white;
 colors.reachableTile = colors.brown1;
 colors.reachableUnavailableKeyboard = colors.beige6;
 
+// Important game variables
+const NUM_COLUMNS = 7;
+const NUM_STARTING_ROWS = 3;
+
+
+const canvas = document.getElementById("canvas");
+const context = canvas.getContext("2d");
+let levelWidth = canvas.width // tileSize * (NUM_COLUMNS + 0.5);
+let tileSize = canvas.width / (NUM_COLUMNS + 0.5);
+let levelHeight = tileSize * 10;
+
 function calculateKeyboardKeyWidth() {
   const keyboardRowWidth = document.querySelector(".keyboard-row").offsetWidth;
   const maxKeysInRow = 10;
@@ -52,16 +63,6 @@ function setKeyboardKeyWidth(width) {
   const enterButton = document.getElementById("enter");
   enterButton.style.width = `${width * 1.5}px`;
 }
-
-const canvas = document.getElementById("canvas");
-const context = canvas.getContext("2d");
-
-const NUM_COLUMNS = 7;
-const NUM_STARTING_ROWS = 3;
-
-let levelWidth = canvas.width // tileSize * (NUM_COLUMNS + 0.5);
-let tileSize = canvas.width / (NUM_COLUMNS + 0.5);
-let levelHeight = tileSize * 10;
 
 function setGameDimensions() {
   const keyboardKeyWidth = calculateKeyboardKeyWidth();
