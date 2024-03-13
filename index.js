@@ -36,8 +36,11 @@ colors.reachableUnavailableKeyboard = colors.beige6;
 // Important game variables
 const NUM_COLUMNS = 7;
 const NUM_STARTING_ROWS = 3;
-let tileDescentSpeed = 0.10; // how many new tiles should be added per 1 second TODO: make this a function of level
-let freezeTimeMs = 0; // how many seconds to freeze time for when a word is formed
+const STARTING_TILE_DESCENT_SPEED = 0.1 // how many new tiles should be added per 1 second
+const STARTING_FREEZE_TIME = 500 // how many seconds to freeze time for when a word is formed
+
+let tileDescentSpeed = STARTING_TILE_DESCENT_SPEED;
+let freezeTimeMs = STARTING_FREEZE_TIME;
 
 const canvas = document.getElementById("canvas");
 const context = canvas.getContext("2d");
@@ -240,8 +243,8 @@ window.onload = function() {
     rowOffset = 0;
     level.tiles = [];
     player.score = 0
-    freezeTimeMs = 0;
-    tileDescentSpeed = 0.10;
+    freezeTimeMs = STARTING_FREEZE_TIME;
+    tileDescentSpeed = STARTING_TILE_DESCENT_SPEED;
     for (let i = 0; i < NUM_STARTING_ROWS; i++) {
       level.tiles[i] = [];
       for (let j = 0; j < NUM_COLUMNS; j++) {
@@ -250,6 +253,7 @@ window.onload = function() {
         level.tiles[i][j] = new Tile(i, j, val);
       }
     }
+    renderTiles()
     newRound();
     main(0);
   }
@@ -311,7 +315,7 @@ window.onload = function() {
   // Main game loop
   function main(tframe) {
     if (gameState == gameStates.lose) {
-      render();
+      showGameOverScreen()
       return;
     }
     window.requestAnimationFrame(main);
@@ -345,7 +349,8 @@ window.onload = function() {
     } else if (gameState == gameStates.removing) {
       stateRemoveTiles(dt);
     } else if (gameState == gameStates.lose) {
-      renderGameOverScreen();
+      // get game-over-screen from html
+      showGameOverScreen()
     }
   }
 
@@ -397,7 +402,6 @@ window.onload = function() {
   // Render the game
   function render() {
     if (gameState == gameStates.lose) {
-      renderGameOverScreen();
       return;
     }
     renderFrame();
@@ -804,15 +808,15 @@ window.onload = function() {
       removeTiles();
       player.word = [];
       player.previousWords.push(word);
-      if (word.length == 3) {
-        player.score += 1;
-      } else if (word.length == 4) {
-        player.score += 4;
-        freezeTimeMs += 1500;
+
+      const score = Math.pow(2, word.length - 2); // 3 = 1, 4 = 4, 5 = 8, 6 = 16, 7 = 32
+      player.score += score
+
+      if (word.length == 4) {
+        freezeTimeMs += 2000;
       } else if (word.length >= 5) {
-        const score = Math.pow(2, word.length - 3);
-        player.score += score
-        freezeTimeMs += 3000;
+        const freezeTime = Math.pow(1.5, word.length - 3) * 1000; // 5 = 2800, 6 = 5000, 7 = 8000
+        freezeTimeMs += freezeTime
         // TODO: give player a bomb to use?
       }
     } else {
@@ -828,10 +832,10 @@ window.onload = function() {
   }
 
   function onKeyDown(e) {
-    if (gameState == gameStates.lose) {
-      resetLevel();
-      return;
-    }
+    // if (gameState == gameStates.lose) {
+    //   resetLevel();
+    //   return;
+    // }
     const key = e.key.toUpperCase();
     if (key === "BACKSPACE") {
       deleteLastLetter();
@@ -1084,6 +1088,19 @@ window.onload = function() {
     drawCenterText(`Score: ${player.score}`, 24, levelWidth / 2, levelHeight - 24);
   }
 
+  function showGameOverScreen() {
+    document.getElementById("game-over-screen").style.display = "flex";
+    document.getElementById('game-over-score').innerText = player.score
+    // fill <ul> with <li> elements of previous words
+    const wordsList = document.getElementById('game-over-words-list')
+    wordsList.innerHTML = ''
+    player.previousWords.forEach(word => {
+      const li = document.createElement('li')
+      li.innerText = word
+      wordsList.appendChild(li)
+    });
+  }
+
   function renderGameOverScreen() {
     // background
     context.fillStyle = colors.beige1;
@@ -1119,5 +1136,17 @@ window.onload = function() {
     context.fill();
   }
 
-  init();
+  function onStart() {
+    const instructions = document.getElementById("start-screen");
+    instructions.style.display = "none";
+    init();
+  }
+  function onRestart() {
+    resetLevel()
+    document.getElementById("game-over-screen").style.display = 'none';
+  }
+  window.onStart = onStart
+  window.onRestart = onRestart
 };
+
+

@@ -96,18 +96,92 @@ p {
     max-width: 80px;
 }
 
+.full-screen-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 2em;
+    background-color: beige;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+
+    font-family: "Josefin Sans", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 500;
+    font-style: normal;
+
+    h1 {
+        font-size: 3em;
+        color: #000000;
+        text-align: center;
+    }
+
+    p {
+        font-size: 1.5em;
+        color: #000000;
+        text-align: center;
+
+    }
+
+    .instruction-text {
+        margin-bottom: 1em;
+    }
+}
+
+.game-over-background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 2em;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    z-index: 100;
+
+    li {
+        font-family: "Josefin Sans", sans-serif;
+        font-optical-sizing: auto;
+        font-weight: 400;
+        font-style: italic;
+        list-style-type: none;
+        font-size: 1.2em;
+        color: #A9A9A9;
+        margin-bottom: 0.3em;
+    }
+}
+
+.game-over-foreground {
+    position: relative;
+    z-index: 101;
+}
+
+#game-over-score {
+    font-size: 6em;
+    text-align: center;
+    margin-bottom: 1em;
+}
+
+.overlay-button {
+    padding: 10px 20px;
+    background-color: #fff;
+    border: 1px solid #000;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+#game-over-screen {
+    display: none;
+}
+
 /* smaller screens */
 @media screen and (max-width: 768px) {
-    /*.keyboard {*/
-    /*}*/
-    /*.keyboard-button {*/
-    /*  font-size: 5vw;*/
-    /*  color: aqua;*/
-    /*}*/
-    /*.keyboard-enter {*/
-    /*  width: calc(100% / 5 - 4px);*/
-    /*}*/
-    /*.keyboard-del {*/
-    /*  width: calc(100% / 5 - 4px);*/
-    /*}*/
 }

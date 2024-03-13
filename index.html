@@ -15,7 +15,8 @@
   />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Chivo+Mono&family=Josefin+Sans:ital@0;1&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Chivo+Mono&family=Josefin+Sans:ital@0;1&display=swap"
+        rel="stylesheet">
 </head>
 <body>
 <main>
@@ -62,11 +63,29 @@
           <p>Del</p>
         </button>
       </div>
-      <!--        <div class="keyboard-row">-->
-      <!--          <button id="dumpButton" class="keyboard-button" style="width: 300px" tabindex="-1">-->
-      <!--            Add row-->
-      <!--          </button>-->
-      <!--        </div>-->
+    </div>
+  </div>
+
+  <div class="full-screen-overlay instructions" id="start-screen">
+    <h1>Bubble Popple</h1>
+    <p class="instruction-text">Make words using available bubbles</p>
+    <p class="instruction-text">Stay alive as long as possible</p>
+    <p class="instruction-text">Longer words ➡️ More points & Pause time</p>
+    <button id="start" class="overlay-button" onclick="onStart()"><p>Start</p></button>
+  </div>
+
+  <div class="full-screen-overlay" id="game-over-screen">
+    <div class="game-over-background">
+      <ul id="game-over-words-list">
+        <li>foo</li>
+        <li>bar</li>
+        <li>bax</li>
+      </ul>
+    </div>
+    <div class="game-over-foreground">
+      <p>Score</p>
+      <p id="game-over-score">0</p>
+      <button id="restart" class="overlay-button" onclick="onRestart()"><p>Restart</p></button>
     </div>
   </div>
 </main>
