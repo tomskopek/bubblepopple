@@ -379,8 +379,8 @@ window.onload = function() {
 
   function checkIncreaseDifficulty() {
     // increase difficulty every x seconds
-    if (gameTimeMs > 20 * 1000) {
-      tileDescentSpeed *= 1.1
+    if (gameTimeMs > 10 * 1000) {
+      tileDescentSpeed *= 1.2
       debug.tileDescentSpeed = tileDescentSpeed;
       gameTimeMs = 0;
     }
@@ -1088,6 +1088,15 @@ window.onload = function() {
     drawCenterText(`Score: ${player.score}`, 24, levelWidth / 2, levelHeight - 24);
   }
 
+  function replaceSeedInQueryParams() {
+    const min = 10000;
+    const max = 99999;
+    const seed = Math.floor(Math.random() * (max - min + 1)) + min;
+    const url = new URL(window.location.href);
+    url.searchParams.set('seed', seed);
+    window.history.pushState({}, '', url);
+  }
+
   function showGameOverScreen() {
     document.getElementById("game-over-screen").style.display = "flex";
     document.getElementById('game-over-score').innerText = player.score
@@ -1136,12 +1145,21 @@ window.onload = function() {
     context.fill();
   }
 
+  function setSeedIfNoneExists() {
+    const url = new URL(window.location.href);
+    const seed = url.searchParams.get('seed');
+    if (!seed) {
+      replaceSeedInQueryParams()
+    }
+  }
+
   function onStart() {
-    const instructions = document.getElementById("start-screen");
-    instructions.style.display = "none";
+    setSeedIfNoneExists()
+    document.getElementById("start-screen").style.display = "none";
     init();
   }
   function onRestart() {
+    replaceSeedInQueryParams()
     resetLevel()
     document.getElementById("game-over-screen").style.display = 'none';
   }
