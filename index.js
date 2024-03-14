@@ -87,6 +87,30 @@ function setGameDimensions() {
   rowHeight = tileSize * Math.cos(degToRad(30));
 }
 
+function handleStartScreenKeyDown (event) {
+  if (event.key === "Enter") {
+    onStart();
+  }
+}
+function setupStartScreenListener() {
+  document.addEventListener("keydown", handleStartScreenKeyDown);
+}
+function teardownStartScreenListener() {
+  document.removeEventListener("keydown", handleStartScreenKeyDown);
+}
+
+function handleRestartScreenKeyDown (event) {
+  if (event.key === "Enter") {
+    onRestart();
+  }
+}
+function setupRestartScreenListener() {
+  document.addEventListener("keydown", handleRestartScreenKeyDown);
+}
+function teardownRestartScreenListener() {
+  document.removeEventListener("keydown", handleRestartScreenKeyDown);
+}
+
 window.onresize = function() {
   setGameDimensions();
 };
@@ -809,12 +833,14 @@ window.onload = function() {
       player.word = [];
       player.previousWords.push(word);
 
-      const score = Math.pow(2, word.length - 2); // 3 = 1, 4 = 4, 5 = 8, 6 = 16, 7 = 32
-      player.score += score
-
-      if (word.length == 4) {
+      if (word.length == 3) {
+        player.score += 1
+      } else if (word.length == 4) {
+        player.score += 2
         freezeTimeMs += 2000;
       } else if (word.length >= 5) {
+        const score = Math.pow(2, word.length - 2); // 5 = 4, 6 = 8, 7 = 16
+        player.score += score
         const freezeTime = Math.pow(1.5, word.length - 3) * 1000; // 5 = 2800, 6 = 5000, 7 = 8000
         freezeTimeMs += freezeTime
         // TODO: give player a bomb to use?
@@ -1100,6 +1126,7 @@ window.onload = function() {
   function showGameOverScreen() {
     document.getElementById("game-over-screen").style.display = "flex";
     document.getElementById('game-over-score').innerText = player.score
+    setupRestartScreenListener()
     // fill <ul> with <li> elements of previous words
     const wordsList = document.getElementById('game-over-words-list')
     wordsList.innerHTML = ''
@@ -1154,17 +1181,20 @@ window.onload = function() {
   }
 
   function onStart() {
+    teardownStartScreenListener()
     setSeedIfNoneExists()
     document.getElementById("start-screen").style.display = "none";
     init();
   }
   function onRestart() {
+    teardownRestartScreenListener()
     replaceSeedInQueryParams()
     resetLevel()
     document.getElementById("game-over-screen").style.display = 'none';
   }
   window.onStart = onStart
   window.onRestart = onRestart
-};
 
+  setupStartScreenListener()
+};
 
